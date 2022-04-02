@@ -12,8 +12,41 @@ jobs:
     secrets:
       github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
 
+  deploy:
+    uses: jmpa-io/depot/.github/workflows/deploy.yml@main
+    with:
+      templates: 00-website
+    secrets:
+      github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+
+  build-website:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@v2
+
+      - name: Upload artifact.
+        uses: actions/upload-artifact@v3
+        with:
+          name: website
+          path: src/*
+          if-no-files-found: error
+          retention-days: 7
+
+  upload-website:
+    needs: [deploy, build-website]
+    uses: jmpa-io/depot/.github/workflows/upload-website.yml@main
+    with:
+      artifact: website
+    secrets:
+      github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+
   post-to-slack:
-    needs: [lint]
+    needs: [lint, upload-website]
     if: always()
     uses: jmpa-io/depot/.github/workflows/post-to-slack.yml@main
     secrets:
