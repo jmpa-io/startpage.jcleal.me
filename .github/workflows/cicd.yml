@@ -6,49 +6,59 @@ on:
   repository_dispatch:
     types: [trigger]
 
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+
 jobs:
   lint:
-    uses: jmpa-io/depot/.github/workflows/lint.yml@main
+    uses: jmpa-io/pipelines/.github/workflows/10-lint.yml@main
     secrets:
-      github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
+      ADMIN_GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
 
   deploy:
-    uses: jmpa-io/depot/.github/workflows/deploy.yml@main
+    needs: [lint]
+    uses: jmpa-io/pipelines/.github/workflows/40-deploy-to-aws.yml@main
     with:
-      templates: 00-website
+      environment: prod
+      templates: deploy
     secrets:
-      github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
 
   build-website:
-    runs-on: ubuntu-20.04
+    needs: [lint]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout.
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Upload artifact.
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: website
+          name: startpage.jcleal.me
           path: src/*
           if-no-files-found: error
           retention-days: 7
 
   upload-website:
     needs: [deploy, build-website]
-    uses: jmpa-io/depot/.github/workflows/upload-website.yml@main
+    uses: jmpa-io/pipelines/.github/workflows/50-upload-artifacts-to-s3.yml@main
     with:
-      artifact: website
+      artifact: startpage.jcleal.me
     secrets:
-      github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-      aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      aws-secret-access-key: ${{ secrets.AWS_SECRET }}
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
 
   post-to-slack:
-    needs: [lint, upload-website]
+    needs: [lint, deploy, build-website, upload-website]
     if: always()
-    uses: jmpa-io/depot/.github/workflows/post-to-slack.yml@main
+    uses: jmpa-io/pipelines/.github/workflows/99-post-to-slack.yml@main
     secrets:
-      github-token: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-      slack-webhook: ${{ secrets.SLACK_GITHUB_WEBHOOK_URL }}
+      WEBHOOK: ${{ secrets.SLACK_GITHUB_NOTIFICATIONS_WEBHOOK }}
