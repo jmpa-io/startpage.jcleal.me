@@ -54,6 +54,7 @@ Resources:
 
   OriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Condition: CreateResources
     Properties:
       CloudFrontOriginAccessIdentityConfig:
         Comment: !Sub Access to ${Bucket}.
