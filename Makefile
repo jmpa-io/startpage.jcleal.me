@@ -5,19 +5,11 @@ endif
 
 # ---
 
-# The param prefix is the beginning of a path in AWS SSM Parameter Store that
-# points to config for this website.
-ifeq ($(ENVIRONMENT),prod)
-PARAM_PREFIX ?= $(REPO)
-else
-PARAM_PREFIX ?= $(ENVIRONMENT).$(REPO)
-endif
+# The hosted zone id in Route53 (shared with jcleal.me — same zone).
+HOSTED_ZONE_ID ?= $(shell aws ssm get-parameter --name /jcleal.me/hosted-zone/id --query 'Parameter.Value' --output text)
 
-# The hosted zone id in Route53.
-HOSTED_ZONE_ID ?= $(shell aws ssm get-parameter --name /$(PARAM_PREFIX)/hosted-zone/id --query 'Parameter.Value' --output text)
-
-# The bucket to upload the website to.
-UPLOAD_BUCKET ?= $(shell aws ssm get-parameter --name /$(PARAM_PREFIX)/bucket --query 'Parameter.Value' --output text)
+# The bucket to upload the website to (written by CF stack on first deploy).
+UPLOAD_BUCKET ?= $(shell aws ssm get-parameter --name /$(REPO)/bucket --query 'Parameter.Value' --output text)
 
 # The cert is shared with jcleal.me (wildcard *.jcleal.me).
 CERT_ARN ?= $(shell aws ssm get-parameter --region us-east-1 --name /certs/jcleal.me/arn --query 'Parameter.Value' --output text)
