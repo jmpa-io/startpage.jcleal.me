@@ -2,9 +2,14 @@
 name: CI/CD
 on:
   push:
+    paths:
+      - '.github/workflows/cicd.yml'
+      - 'cf/**'
+      - 'src/**'
+      - 'Makefile*'
   workflow_dispatch:
   repository_dispatch:
-    types: [trigger]
+    types: [update-cicd]
 
 permissions:
   id-token: write
