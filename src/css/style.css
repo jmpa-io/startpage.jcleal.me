@@ -6,11 +6,11 @@
 :root {
   --font: "Roboto Mono";
   --background: transparent;
-  --foreground: #fffffe;
-  --blue: #4dbed0;
-  --purple: #d583d0;
+  --foreground: #1a1a1a;
+  --blue: #0a6a78;
+  --purple: #7a3a78;
   --white: #fff;
-  --pink: #ff1e9c;
+  --pink: #b01068;
   --black: #090A0F;
   --branch: 1px solid #a7a9be;
 }
@@ -18,8 +18,26 @@
 html {
   font-size: 14px;
   height: 100%;
-  background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+  background: radial-gradient(ellipse at bottom, #dfe6ee 0%, #f4f4f6 100%);
   overflow: hidden;
+}
+
+/* dark is the terminal's native look — restores the original fixed-dark values */
+html.dark {
+  --foreground: #fffffe;
+  --blue: #4dbed0;
+  --purple: #d583d0;
+  --pink: #ff1e9c;
+  background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+}
+
+/* blue/purple/pink bridged from palette.css — tree/prompt/user colours track the
+   chosen palette; foreground stays neutral so body text keeps reading cleanly */
+html.ocean, html.forest, html.sunset, html.violet, html.yellow, html.grey, html.purple, html.crimson, html.teal,
+html.dark.ocean, html.dark.forest, html.dark.sunset, html.dark.violet, html.dark.yellow, html.dark.grey, html.dark.purple, html.dark.crimson, html.dark.teal {
+  --blue:   var(--pal-accent);
+  --purple: var(--pal-heading);
+  --pink:   var(--pal-accent-hover);
 }
 
 body {
@@ -128,4 +146,75 @@ input {
 
 .user {
   color: var(--pink);
+}
+
+/* ── palette + scheme controls ── */
+.jc-controls {
+  position: fixed;
+  top: 0.75rem;
+  right: 1rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-family: var(--font);
+  font-size: 1rem;
+}
+
+.scheme-toggle,
+.palette-trigger {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-family: var(--font);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0;
+}
+
+.scheme-toggle:hover,
+.palette-trigger:hover {
+  color: var(--blue);
+}
+
+.palette-wrap {
+  position: relative;
+}
+
+.palette-popup {
+  display: none;
+  position: absolute;
+  top: 1.5rem;
+  right: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: var(--black);
+  border: 1px solid #a7a9be;
+  padding: 0.5rem 0.75rem;
+  white-space: nowrap;
+}
+
+.palette-popup.open {
+  display: flex;
+}
+
+.palette-btn {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+  padding: 0;
+}
+
+.palette-btn:hover,
+.palette-btn.active {
+  color: var(--white);
+  background: #ffffff1a;
+}
+
+.palette-swatch {
+  display: inline-block;
 }
