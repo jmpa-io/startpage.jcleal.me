@@ -1,15 +1,55 @@
 <!-- based on https://notabug.org/nytly/home-->
 <!DOCTYPE html>
-<html>
+<html class="dark">
 
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" type="text/css" href="css/style.css">
+  <link rel="stylesheet" type="text/css" href="css/palette.css">
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <title>💻</title>
+  <!-- prevent theme/palette flash -->
+  <script>(function(){
+    var s=localStorage.getItem('scheme');
+    if(s==='light')document.documentElement.classList.remove('dark');
+    var p=localStorage.getItem('palette');
+    var palettes=['ocean','forest','sunset','violet','yellow','grey','purple','crimson','teal'];
+    if(p&&palettes.indexOf(p)!==-1)document.documentElement.classList.add(p);
+  })()</script>
+  <script src="js/palette.js"></script>
+  <script>
+    Palette.init({
+      btnSelector: '.palette-btn',
+      triggerId: 'palette-trigger',
+      popupId: 'palette-popup',
+      toggleId: 'scheme-toggle',
+      onScheme: function (scheme, toggle) {
+        if (!toggle) return;
+        toggle.textContent = scheme === 'dark' ? '[dark]' : '[light]';
+      }
+    });
+  </script>
 </head>
 
 <body>
+  <div class="jc-controls">
+    <button class="scheme-toggle" id="scheme-toggle" title="Toggle theme">[dark]</button>
+    <div class="palette-wrap">
+      <button class="palette-trigger" id="palette-trigger" title="Colour theme">[theme]</button>
+      <div class="palette-popup" id="palette-popup">
+        <button class="palette-btn" data-palette="ocean"><span class="palette-swatch" style="color:#1a7ab0">■</span> ocean</button>
+        <button class="palette-btn" data-palette="forest"><span class="palette-swatch" style="color:#2a7a30">■</span> forest</button>
+        <button class="palette-btn" data-palette="sunset"><span class="palette-swatch" style="color:#c04828">■</span> sunset</button>
+        <button class="palette-btn" data-palette="violet"><span class="palette-swatch" style="color:#6a30b0">■</span> violet</button>
+        <button class="palette-btn" data-palette="yellow"><span class="palette-swatch" style="color:#b89000">■</span> yellow</button>
+        <button class="palette-btn" data-palette="grey"><span class="palette-swatch" style="color:#7080a0">■</span> grey</button>
+        <button class="palette-btn" data-palette="purple"><span class="palette-swatch" style="color:#d01880">■</span> purple</button>
+        <button class="palette-btn" data-palette="crimson"><span class="palette-swatch" style="color:#c21f3a">■</span> crimson</button>
+        <button class="palette-btn" data-palette="teal"><span class="palette-swatch" style="color:#1a9a92">■</span> teal</button>
+        <button class="palette-btn" data-palette=""><span class="palette-swatch" style="color:#a7a9be">■</span> default</button>
+      </div>
+    </div>
+  </div>
   <div class="terminal">
     <div class="prompt">[<span class="user">jcleal</span>@<span>home</span> ~]$ tree</div>
     <div class="tree">
