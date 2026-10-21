@@ -1,0 +1,11 @@
+{
+  "name": "startpage.jcleal.me",
+  "private": true,
+  "scripts": {
+    "test": "NODE_OPTIONS=--no-experimental-webstorage vitest run"
+  },
+  "devDependencies": {
+    "jsdom": "^25.0.1",
+    "vitest": "^2.1.9"
+  }
+}
