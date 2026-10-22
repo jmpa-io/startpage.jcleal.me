@@ -18,23 +18,12 @@ permissions:
 
 jobs:
   lint:
-    uses: jmpa-io/pipelines/.github/workflows/10-lint.yml@main
+    uses: jmpa-io/pipelines/.github/workflows/10-lint.yml@7778d436a95a3f61fe6416e7219502afd8ccb5d9 # v1.0.0
     secrets:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
       AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
       ADMIN_GITHUB_TOKEN: ${{ secrets.ADMIN_GITHUB_TOKEN }}
-
-  deploy:
-    needs: [lint]
-    uses: jmpa-io/pipelines/.github/workflows/40-deploy-to-aws.yml@main
-    with:
-      environment: prod
-      templates: deploy
-    secrets:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
 
   build-website:
     needs: [lint]
@@ -51,20 +40,15 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  upload-website:
-    needs: [deploy, build-website]
-    uses: jmpa-io/pipelines/.github/workflows/50-upload-artifacts-to-s3.yml@main
-    with:
-      artifact: startpage.jcleal.me
-    secrets:
-      AWS_REGION: ${{ secrets.AWS_REGION }}
-      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-      AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
+  # NOTE: CI deliberately does not deploy or sync this site. The live CloudFormation stack (startpage-jcleal-me) predates the
+  # template in cf/ (different logical IDs, fixed-name resources), so deploying over it would fail the
+  # existence check, or replace live resources if it ever passed. Migrate the live stack (resource import)
+  # before re-adding a deploy job.
 
   post-to-slack:
-    needs: [lint, deploy, build-website, upload-website]
+    needs: [lint, build-website]
     if: always()
-    uses: jmpa-io/pipelines/.github/workflows/99-post-to-slack.yml@main
+    uses: jmpa-io/pipelines/.github/workflows/99-post-to-slack.yml@7778d436a95a3f61fe6416e7219502afd8ccb5d9 # v1.0.0
     with:
       needs: ${{ toJSON(needs) }}
     secrets:
