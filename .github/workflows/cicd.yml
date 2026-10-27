@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   lint:
-    uses: jmpa-io/pipelines/.github/workflows/10-lint.yml@7778d436a95a3f61fe6416e7219502afd8ccb5d9 # v1.0.0
+    uses: jmpa-io/pipelines/.github/workflows/10-lint.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
     secrets:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -40,16 +40,72 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  # NOTE: CI deliberately does not deploy or sync this site. The live CloudFormation stack (startpage-jcleal-me) predates the
-  # template in cf/ (different logical IDs, fixed-name resources), so deploying over it would fail the
-  # existence check, or replace live resources if it ever passed. Migrate the live stack (resource import)
-  # before re-adding a deploy job.
+  deploy:
+    needs: [build-website]
+    uses: jmpa-io/pipelines/.github/workflows/40-deploy-to-aws.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
+    with:
+      templates: website
+      account_id: '213851291874' # the dev AWS account.
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
+
+  upload-website:
+    needs: [deploy]
+    uses: jmpa-io/pipelines/.github/workflows/50-upload-artifacts-to-s3.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
+    with:
+      artifact: startpage.jcleal.me
+      account_id: '213851291874' # the dev AWS account.
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
+
+  # Prove the dev copy serves a directory URL (the home page and a subpage) before anything else
+  # builds on it. CloudFront can lag a few seconds behind the stack update, so retry.
+  smoke-test:
+    needs: [upload-website]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch the dev site.
+        run: |
+          for path in /; do
+            curl -fsS --retry 8 --retry-delay 15 --retry-all-errors -o /dev/null "https://startpage.dev.jcleal.me${path}"
+            echo "ok https://startpage.dev.jcleal.me${path}"
+          done
+
+  # Promote to prod: when this lands on main, publish the exact artifact that just passed the dev smoke test to the live
+  # site (prod account), then check the live URLs. Merging to main is the approval.
+  publish-prod:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [smoke-test]
+    uses: jmpa-io/pipelines/.github/workflows/50-upload-artifacts-to-s3.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
+    with:
+      artifact: startpage.jcleal.me
+      environment: prod
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
+
+  smoke-test-prod:
+    needs: [publish-prod]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch the live site.
+        run: |
+          for path in /; do
+            curl -fsS --retry 8 --retry-delay 15 --retry-all-errors -o /dev/null "https://startpage.jcleal.me${path}"
+            echo "ok https://startpage.jcleal.me${path}"
+          done
 
   post-to-slack:
-    needs: [lint, build-website]
+    needs: [lint, build-website, deploy, upload-website, smoke-test, publish-prod, smoke-test-prod]
     if: always()
-    uses: jmpa-io/pipelines/.github/workflows/99-post-to-slack.yml@7778d436a95a3f61fe6416e7219502afd8ccb5d9 # v1.0.0
+    uses: jmpa-io/pipelines/.github/workflows/99-post-to-slack.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
     with:
       needs: ${{ toJSON(needs) }}
     secrets:
       WEBHOOK: ${{ secrets.SLACK_GITHUB_NOTIFICATIONS_WEBHOOK }}
+
