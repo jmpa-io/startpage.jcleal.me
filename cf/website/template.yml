@@ -16,7 +16,7 @@ Parameters:
     Type: String
 
   AcmCertificateArn:
-    Description: The certificate arn for the domain (shared wildcard *.jcleal.me).
+    Description: The certificate arn for the domain.
     Type: String
 
   LogBucket:
@@ -54,10 +54,32 @@ Resources:
 
   OriginAccessIdentity:
     Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
-    Condition: CreateResources
     Properties:
       CloudFrontOriginAccessIdentityConfig:
         Comment: !Sub Access to ${Bucket}.
+
+  # S3 (via an origin access identity) has no index-document handling, so '/' and '/foo/' would 403.
+  # Rewrite directory-style URLs to their index.html before they reach the origin.
+  DirectoryIndexFunction:
+    Type: AWS::CloudFront::Function
+    Condition: CreateResources
+    Properties:
+      Name: !Sub ${AWS::StackName}-directory-index
+      AutoPublish: true
+      FunctionConfig:
+        Comment: Serve index.html for directory-style URLs.
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+          if (uri.endsWith('/')) {
+            request.uri += 'index.html';
+          } else if (uri.indexOf('.', uri.lastIndexOf('/')) === -1) {
+            request.uri += '/index.html';
+          }
+          return request;
+        }
 
   Distribution:
     Type: AWS::CloudFront::Distribution
@@ -80,6 +102,9 @@ Resources:
             - HEAD
           Compress: true
           TargetOriginId: S3Origin
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt DirectoryIndexFunction.FunctionMetadata.FunctionARN
           ForwardedValues:
             QueryString: true
           ViewerProtocolPolicy: redirect-to-https
@@ -107,7 +132,8 @@ Resources:
         - Name: !Ref Bucket
           Type: A
           AliasTarget:
-            HostedZoneId: Z2FDTNDATAQYW2
+            # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordset-aliastarget.html
+            HostedZoneId: Z2FDTNDATAQYW2 # must be this value for Cloudfront.
             DNSName: !GetAtt Distribution.DomainName
 
   BucketParam:
