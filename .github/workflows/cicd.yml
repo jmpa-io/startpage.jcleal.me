@@ -76,10 +76,21 @@ jobs:
           done
 
   # Promote to prod: when this lands on main, publish the exact artifact that just passed the dev smoke test to the live
-  # site (prod account), then check the live URLs. Merging to main is the approval.
-  publish-prod:
+  # site (prod account), then check the live URLs. Merging to main starts the promotion; the approval gate below lets it through.
+  # Approval gate: the `prod` environment (repo Settings > Environments) requires a reviewer, so the run waits here until the
+  # publish is approved on GitHub. Nothing reaches prod without it.
+  approve-prod:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [smoke-test]
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Approved to publish to prod.
+        run: echo "Approved."
+
+  publish-prod:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [approve-prod]
     uses: jmpa-io/pipelines/.github/workflows/50-upload-artifacts-to-s3.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
     with:
       artifact: startpage.jcleal.me
@@ -101,7 +112,7 @@ jobs:
           done
 
   post-to-slack:
-    needs: [lint, build-website, deploy, upload-website, smoke-test, publish-prod, smoke-test-prod]
+    needs: [lint, build-website, deploy, upload-website, smoke-test, approve-prod, publish-prod, smoke-test-prod]
     if: always()
     uses: jmpa-io/pipelines/.github/workflows/99-post-to-slack.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
     with:
