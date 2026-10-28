@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   generate-readme:
-    uses: jmpa-io/pipelines/.github/workflows/00-README.yml@7778d436a95a3f61fe6416e7219502afd8ccb5d9 # v1.0.0
+    uses: jmpa-io/pipelines/.github/workflows/00-README.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
     secrets:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
