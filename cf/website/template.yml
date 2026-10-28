@@ -1,31 +1,27 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: The website configuration for 'startpage.jcleal.me'.
+Description: Reusable CloudFront + S3 static website stack.
 
 Parameters:
-  Environment:
-    Description: The environment used when deploying this service.
+  Repository:
+    Description: The repository this stack is deployed from.
+    Type: String
+
+  HostedZoneId:
+    Description: The ID for the domain registered via AWS Route53.
     Type: String
 
   Domain:
     Description: The domain registered.
     Type: String
 
-  HostedZoneId:
-    Description: The hosted zone id for the domain.
-    Type: String
-
   AcmCertificateArn:
-    Description: The certificate arn for the domain.
+    Description: The certificate verifying the given domain.
     Type: String
-
-  LogBucket:
-    Type: AWS::SSM::Parameter::Value<String>
-    Default: /common/distribution-logs-bucket
 
   AuthToken:
     Description: >
-      base64 of dev:<password>, read from SSM. The sites in the dev account ask for it (HTTP basic auth); the value 'off'
+      base64 of dev:<password>, read from SSM. Sites in the dev account ask for it (HTTP basic auth); the value 'off'
       (prod) leaves the site public.
     Type: AWS::SSM::Parameter::Value<String>
     Default: /common/dev-site-auth/token
@@ -34,44 +30,103 @@ Conditions:
   CreateResources: !Equals [ !Ref "AWS::Region" , "ap-southeast-2" ]
 
 Resources:
-  Bucket:
+  Website:
     Type: AWS::S3::Bucket
     Condition: CreateResources
-    DeletionPolicy: Delete
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       BucketName: !Ref Domain
-      WebsiteConfiguration:
-        IndexDocument: index.html
-        ErrorDocument: 404.html
-      AccessControl: BucketOwnerFullControl
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: repository
+          Value: !Ref Repository
 
-  BucketPolicy:
+  # OAC replaces OAI. CloudFront authenticates to S3 using sigv4 — no public
+  # access or website endpoint needed.
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Condition: CreateResources
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub ${Domain}-oac
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  # Allows CloudFront (via OAC) to read objects. No public access.
+  WebsiteBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Condition: CreateResources
     Properties:
-      Bucket: !Ref Bucket
+      Bucket: !Ref Website
       PolicyDocument:
+        Version: '2012-10-17'
         Statement:
-          - Sid: allow-read-for-OAI
+          - Sid: AllowCloudFrontServicePrincipal
             Effect: Allow
             Principal:
-              CanonicalUser: !GetAtt OriginAccessIdentity.S3CanonicalUserId
+              Service: cloudfront.amazonaws.com
             Action: s3:GetObject
-            Resource: !Sub "arn:aws:s3:::${Bucket}/*"
+            Resource: !Sub "arn:aws:s3:::${Website}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
 
-  OriginAccessIdentity:
-    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+  DistributionLogBucket:
+    Type: AWS::S3::Bucket
+    Condition: CreateResources
     Properties:
-      CloudFrontOriginAccessIdentityConfig:
-        Comment: !Sub Access to ${Bucket}.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        IgnorePublicAcls: true
+        BlockPublicPolicy: true
+        RestrictPublicBuckets: true
+      # BucketOwnerPreferred (not BucketOwnerEnforced) is required so CloudFront log
+      # delivery can write with s3:x-amz-acl: bucket-owner-full-control.
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      LifecycleConfiguration:
+        Rules:
+          - Status: Enabled
+            ExpirationInDays: 30
+      Tags:
+        - Key: repository
+          Value: !Ref Repository
 
-  # S3 (via an origin access identity) has no index-document handling, so '/' and '/foo/' would 403.
-  # Rewrite directory-style URLs to their index.html before they reach the origin.
+  DistributionLogBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Condition: CreateResources
+    Properties:
+      Bucket: !Ref DistributionLogBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: CloudFrontAccessLogs
+            Principal:
+              Service: delivery.logs.amazonaws.com
+            Effect: Allow
+            Action: s3:PutObject
+            Resource: !Sub 'arn:aws:s3:::${DistributionLogBucket}/*'
+            Condition:
+              StringEquals:
+                s3:x-amz-acl: bucket-owner-full-control
+
+  # S3 (via OAC) doesn't resolve "/about/" to "/about/index.html" the way the S3 website endpoint did, so rewrite
+  # directory-style URLs before they reach the bucket. Paths with a file extension are left alone.
   DirectoryIndexFunction:
     Type: AWS::CloudFront::Function
     Condition: CreateResources
     Properties:
-      Name: !Sub ${AWS::StackName}-directory-index
+      # Function names can't contain dots.
+      Name: !Sub
+        - ${Slug}-directory-index
+        - Slug: !Join [ "-", !Split [ ".", !Ref Domain ] ]
       AutoPublish: true
       FunctionConfig:
         Comment: Serve index.html for directory-style URLs, and ask for a password on dev.
@@ -108,28 +163,31 @@ Resources:
     Properties:
       DistributionConfig:
         Enabled: true
-        Comment: !Ref Bucket
+        Comment: !Ref Website
         Origins:
           - Id: S3Origin
-            DomainName: !Sub "${Bucket}.s3.${AWS::Region}.amazonaws.com"
+            DomainName: !Sub "${Website}.s3.${AWS::Region}.amazonaws.com"
             S3OriginConfig:
-              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
+              OriginAccessIdentity: ""
+            OriginAccessControlId: !GetAtt OriginAccessControl.Id
         HttpVersion: http2
         Aliases:
-          - !Ref Bucket
+          - !Ref Website
         DefaultCacheBehavior:
           AllowedMethods:
             - GET
             - HEAD
           Compress: true
           TargetOriginId: S3Origin
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6 # CachingOptimized (AWS managed)
+          ViewerProtocolPolicy: redirect-to-https
           FunctionAssociations:
             - EventType: viewer-request
               FunctionARN: !GetAtt DirectoryIndexFunction.FunctionMetadata.FunctionARN
-          ForwardedValues:
-            QueryString: true
-          ViewerProtocolPolicy: redirect-to-https
         CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
           - ErrorCode: 404
             ResponseCode: 200
             ResponsePagePath: /index.html
@@ -138,28 +196,27 @@ Resources:
           AcmCertificateArn: !Ref AcmCertificateArn
           SslSupportMethod: sni-only
         Logging:
-          Bucket: !Sub "${LogBucket}.s3.amazonaws.com"
-          Prefix: !Ref Bucket
+          Bucket: !Sub "${DistributionLogBucket}.s3.amazonaws.com"
+          Prefix: !Ref Website
           IncludeCookies: false
+      Tags:
+        - Key: repository
+          Value: !Ref Repository
 
-  RecordSet:
+  WebsiteRecordSet:
     Type: AWS::Route53::RecordSetGroup
     Condition: CreateResources
-    DependsOn:
-      - Distribution
     Properties:
       HostedZoneId: !Ref HostedZoneId
       RecordSets:
-        - Name: !Ref Bucket
+        - Name: !Ref Website
           Type: A
           AliasTarget:
-            # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-route53-recordset-aliastarget.html
-            HostedZoneId: Z2FDTNDATAQYW2 # must be this value for Cloudfront.
+            HostedZoneId: Z2FDTNDATAQYW2
             DNSName: !GetAtt Distribution.DomainName
 
-  BucketParam:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: !Sub /${Domain}/bucket
-      Type: String
-      Value: !Ref Bucket
+Outputs:
+  Bucket:
+    Condition: CreateResources
+    Description: The name of the S3 bucket used to host the website.
+    Value: !Ref Website
