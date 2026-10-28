@@ -68,10 +68,19 @@ jobs:
     needs: [upload-website]
     runs-on: ubuntu-latest
     steps:
+      - name: Configure AWS.
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::213851291874:role/${{ secrets.AWS_RUNNER_ROLE_NAME || 'github-actions' }}
+          role-session-name: github-actions
+          aws-region: ap-southeast-2
+
       - name: Fetch the dev site.
         run: |
+          password=$(aws ssm get-parameter --name /common/dev-site-auth/password --with-decryption --query Parameter.Value --output text)
+          echo "::add-mask::$password"
           for path in /; do
-            curl -fsS --retry 8 --retry-delay 15 --retry-all-errors -o /dev/null "https://startpage.dev.jcleal.me${path}"
+            curl -fsS --retry 8 --retry-delay 15 --retry-all-errors -u "dev:$password" -o /dev/null "https://startpage.dev.jcleal.me${path}"
             echo "ok https://startpage.dev.jcleal.me${path}"
           done
 
