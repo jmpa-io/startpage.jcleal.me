@@ -23,6 +23,13 @@ Parameters:
     Type: AWS::SSM::Parameter::Value<String>
     Default: /common/distribution-logs-bucket
 
+  AuthToken:
+    Description: >
+      base64 of dev:<password>, read from SSM. The sites in the dev account ask for it (HTTP basic auth); the value 'off'
+      (prod) leaves the site public.
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: /common/dev-site-auth/token
+
 Conditions:
   CreateResources: !Equals [ !Ref "AWS::Region" , "ap-southeast-2" ]
 
@@ -67,19 +74,33 @@ Resources:
       Name: !Sub ${AWS::StackName}-directory-index
       AutoPublish: true
       FunctionConfig:
-        Comment: Serve index.html for directory-style URLs.
+        Comment: Serve index.html for directory-style URLs, and ask for a password on dev.
         Runtime: cloudfront-js-2.0
-      FunctionCode: |
-        function handler(event) {
-          var request = event.request;
-          var uri = request.uri;
-          if (uri.endsWith('/')) {
-            request.uri += 'index.html';
-          } else if (uri.indexOf('.', uri.lastIndexOf('/')) === -1) {
-            request.uri += '/index.html';
+      FunctionCode: !Sub
+        - |
+          function handler(event) {
+            var request = event.request;
+            // Dev sites ask for a username and password. 'off' (prod) leaves the site public.
+            var token = '${Token}';
+            if (token !== 'off') {
+              var auth = request.headers.authorization;
+              if (!auth || auth.value !== 'Basic ' + token) {
+                return {
+                  statusCode: 401,
+                  statusDescription: 'Unauthorized',
+                  headers: { 'www-authenticate': { value: 'Basic realm="dev"' } }
+                };
+              }
+            }
+            var uri = request.uri;
+            if (uri.endsWith('/')) {
+              request.uri += 'index.html';
+            } else if (uri.indexOf('.', uri.lastIndexOf('/')) === -1) {
+              request.uri += '/index.html';
+            }
+            return request;
           }
-          return request;
-        }
+        - Token: !Ref AuthToken
 
   Distribution:
     Type: AWS::CloudFront::Distribution
