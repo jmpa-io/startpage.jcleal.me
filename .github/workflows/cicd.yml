@@ -97,9 +97,22 @@ jobs:
       - name: Approved to publish to prod.
         run: echo "Approved."
 
-  publish-prod:
+  # Prod infrastructure: the same template as dev, applied to the prod account once the approval above is given.
+  deploy-prod:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [approve-prod]
+    uses: jmpa-io/pipelines/.github/workflows/40-deploy-to-aws.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
+    with:
+      templates: website
+      environment: prod
+    secrets:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_RUNNER_ROLE_NAME: ${{ secrets.AWS_RUNNER_ROLE_NAME }}
+
+  publish-prod:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [deploy-prod]
     uses: jmpa-io/pipelines/.github/workflows/50-upload-artifacts-to-s3.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
     with:
       artifact: startpage.jcleal.me
@@ -121,7 +134,7 @@ jobs:
           done
 
   post-to-slack:
-    needs: [lint, build-website, deploy, upload-website, smoke-test, approve-prod, publish-prod, smoke-test-prod]
+    needs: [lint, build-website, deploy, upload-website, smoke-test, approve-prod, deploy-prod, publish-prod, smoke-test-prod]
     if: always()
     uses: jmpa-io/pipelines/.github/workflows/99-post-to-slack.yml@ce5c5b9a18da6c3975e7bd71f9f7c99b9b49ef2f # v1.1.0
     with:
