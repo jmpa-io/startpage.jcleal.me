@@ -38,10 +38,18 @@ pull-config:
 SERVICE_GROUP_1 = website
 
 # Targets.
+# The live prod stack predates the <project>-website-<env> naming, so keep its name and CI updates it in place.
+ifeq ($(ENVIRONMENT),prod)
+override STACK_NAME := startpage-jcleal-me
+endif
+
 website: ## Deploys the 'website' stack.
-website: ADDITIONAL_PARAMETER_OVERRIDES="AcmCertificateArn=$(CERT_ARN) "
+website: ADDITIONAL_PARAMETER_OVERRIDES="Domain=$(DOMAIN) "
+# Prod keeps the zone and certificate it already has (a deploy reuses the previous values of parameters not given).
+ifneq ($(ENVIRONMENT),prod)
+website: ADDITIONAL_PARAMETER_OVERRIDES+="AcmCertificateArn=$(CERT_ARN) "
 website: ADDITIONAL_PARAMETER_OVERRIDES+="HostedZoneId=$(HOSTED_ZONE_ID) "
-website: ADDITIONAL_PARAMETER_OVERRIDES+="Domain=$(DOMAIN) "
+endif
 website: deploy-website
 
 sync: ## Syncs the downloaded website artifact (dist/) to AWS S3; called by the 50-upload pipeline.
