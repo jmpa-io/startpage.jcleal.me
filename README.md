@@ -11,6 +11,16 @@ The popup has two colour inputs (Primary, Secondary) and Reset; there are no pre
 
 `src/js/palette.js` and `src/js/palette.test.js` are master copies mirrored from jcleal.me (`make e2e-sync` there) - don't edit them here.
 
+## Editing, notes and backup
+
+The page is a draggable terminal-style window (drag the title bar; the position is remembered; on mobile it is a normal stacked layout).
+
+- `[edit]` shows per-item controls: add/rename/delete/reorder (↑↓) groups and links, inline forms. Only `http(s)` and `mailto` URLs are accepted.
+- `[+note]` adds a draggable post-it note: type in it, pick one of four colours, `×` deletes.
+- `[export]` downloads `startpage.json`; `[import]` replaces everything from such a file (invalid files are rejected and nothing changes).
+- Everything lives in one versioned JSON document in `localStorage['startpage.v1']` (`src/js/store.js`, unit-tested in `store.test.js`). No backend, no sync.
+- Every `github.com` link gets the GitHub mark (inline SVG, `data-icon="github"`).
+
 ## Testing
 
 ```bash
