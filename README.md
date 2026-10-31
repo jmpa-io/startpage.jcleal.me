@@ -15,7 +15,7 @@ The popup has two colour inputs (Primary, Secondary) and Reset; there are no pre
 
 The page is an Arch Linux style terminal (dark in day and night, JetBrains Mono / Fira Code, `[jcleal@archlinux ~]$` prompt, neofetch header with live facts, `tree` link list, blinking cursor, tmux-style status bar with clock). Accents follow the Primary/Secondary colours with an Arch-blue default feel.
 
-- Drag the title bar to move; double-click it (or use the maximise button) to maximise/restore; minimise and close (a chip restores it). On mobile it is a full-width stacked layout.
+- Drag the title bar to move; double-click it (or use the maximise button) to maximise/restore; or focus the title bar (or a note's header) and use the arrow keys (Shift = bigger steps). Minimise and close (a chip restores it). On mobile it is a full-width stacked layout.
 - Resize from any of 8 edge/corner handles (pointer, or focus a handle and use the arrow keys; Shift = bigger steps). Minimum 320x200, clamped to the viewport. Position, size and maximised state persist; `Reset layout` restores the defaults. Content scrolls inside the window.
 - Toolbar actions are real buttons with icons and names: Edit, Link, Group, Note, Export, Import, Reset layout (plus day/night and Colours). In edit mode each link row gets move up/down, edit and delete icon buttons, and add/edit use labelled inline forms. Only `http(s)` and `mailto` URLs are accepted.
 - `Note` adds a draggable, resizable post-it (paper texture, tape, slight tilt that straightens on hover/drag, delete button, raises on focus). Its six colour dots are tints derived live from the Primary/Secondary pair (`src/js/note-colours.js`: primary, secondary, warm yellow/green/pink pulled toward the palette, a blend), AA text contrast in day and night. Notes store a palette slot (0-5), not a hex, so they follow the picker; older colour names/hex values are migrated.
@@ -30,4 +30,4 @@ npm ci && npm test                                      # unit tests (vitest + j
 cd e2e && npm ci && npx playwright test                 # screenshot + interaction tests, serves ../src (SITE_DIR overrides)
 npm run test:update                                     # refresh the committed baselines in e2e/*-snapshots
 ```
-Or `make e2e`. External requests are blocked in the tests. `e2e/playwright.config.ts`, `e2e/helpers/palette-helpers.ts` and `e2e/server.mjs` are master copies from jcleal.me; site specifics live in `e2e/site.ts`.
+Or `make e2e`. Set `E2E_PORT` if 4175 is taken (the config reuses whatever already listens there). External requests are blocked in the tests. The page ships a strict `<meta>` Content-Security-Policy (no inline script/style; only `form-action` to google.com); `e2e/manage.spec.ts` runs under it, `site.ts` bypasses it only for the shared style-freezing helper. `e2e/playwright.config.ts`, `e2e/helpers/palette-helpers.ts` and `e2e/server.mjs` are master copies from jcleal.me; site specifics live in `e2e/site.ts`.
