@@ -13,12 +13,14 @@ The popup has two colour inputs (Primary, Secondary) and Reset; there are no pre
 
 ## Editing, notes and backup
 
-The page is a draggable terminal-style window (drag the title bar; the position is remembered; on mobile it is a normal stacked layout).
+The page is an Arch Linux style terminal (dark in day and night, JetBrains Mono / Fira Code, `[jcleal@archlinux ~]$` prompt, neofetch header with live facts, `tree` link list, blinking cursor, tmux-style status bar with clock). Accents follow the Primary/Secondary colours with an Arch-blue default feel.
 
-- `[edit]` shows per-item controls: add/rename/delete/reorder (↑↓) groups and links, inline forms. Only `http(s)` and `mailto` URLs are accepted.
-- `[+note]` adds a draggable post-it note: type in it, pick one of four colours, `×` deletes.
-- `[export]` downloads `startpage.json`; `[import]` replaces everything from such a file (invalid files are rejected and nothing changes).
-- Everything lives in one versioned JSON document in `localStorage['startpage.v1']` (`src/js/store.js`, unit-tested in `store.test.js`). No backend, no sync.
+- Drag the title bar to move; double-click it (or use the maximise button) to maximise/restore; minimise and close (a chip restores it). On mobile it is a full-width stacked layout.
+- Resize from any of 8 edge/corner handles (pointer, or focus a handle and use the arrow keys; Shift = bigger steps). Minimum 320x200, clamped to the viewport. Position, size and maximised state persist; `Reset layout` restores the defaults. Content scrolls inside the window.
+- Toolbar actions are real buttons with icons and names: Edit, Link, Group, Note, Export, Import, Reset layout (plus day/night and Colours). In edit mode each link row gets move up/down, edit and delete icon buttons, and add/edit use labelled inline forms. Only `http(s)` and `mailto` URLs are accepted.
+- `Note` adds a draggable, resizable post-it (paper texture, tape, slight tilt that straightens on hover/drag, delete button, raises on focus). Its six colour dots are tints derived live from the Primary/Secondary pair (`src/js/note-colours.js`: primary, secondary, warm yellow/green/pink pulled toward the palette, a blend), AA text contrast in day and night. Notes store a palette slot (0-5), not a hex, so they follow the picker; older colour names/hex values are migrated.
+- `Export` downloads `startpage.json`; `Import` replaces everything from such a file (invalid files are rejected and nothing changes).
+- Everything lives in one versioned JSON document in `localStorage['startpage.v1']` (`src/js/store.js`, unit-tested in `store.test.js`): groups/links, notes (`x, y, text, slot, w, h`) and the window frame (`x, y, w, h, max, min`). No backend, no sync.
 - Every `github.com` link gets the GitHub mark (inline SVG, `data-icon="github"`).
 
 ## Testing
