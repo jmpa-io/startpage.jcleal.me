@@ -3,10 +3,13 @@ import { SWEEP, contrast, setColours, ensureScheme, contrastFailures } from './h
 
 const KEY = 'startpage.v1';
 
+// Run these under the real CSP (site.ts bypasses it only for the shared style-freezing helper).
+test.use({ bypassCSP: false });
+
+// Every test gets a fresh browser context (empty storage), so one navigation is enough; the old
+// goto + clear + reload doubled page loads per test and blew the 30s budget under CPU load.
 test.beforeEach(async ({ page }) => {
   await page.goto('/index.html');
-  await page.evaluate((k) => { localStorage.removeItem(k); localStorage.removeItem('palette-custom'); localStorage.removeItem('scheme'); }, KEY);
-  await page.reload();
 });
 
 const stored = (page: Page) => page.evaluate((k) => JSON.parse(localStorage.getItem(k) || 'null'), KEY);
@@ -162,6 +165,28 @@ test('invalid import is rejected and leaves the data untouched', async ({ page }
   await page.locator('#sp-import').setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from('{"nope":') });
   await expect(page.locator('#sp-status')).toContainText('import failed');
   await expect(page.locator('.tree a')).toHaveCount(21);
+});
+
+test('imported javascript:/data: links are dropped, not rendered', async ({ page }) => {
+  const doc = { version: 1, window: null, notes: [], groups: [{ id: 'g1', name: 'x', links: [
+    { id: 'a', name: 'bad', url: 'javascript:alert(1)' }, { id: 'b', name: 'bad2', url: 'data:text/html,<b>' },
+    { id: 'c', name: 'ok', url: 'https://example.com/' }] }] };
+  await page.locator('#sp-import').setInputFiles({ name: 'x.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(doc)) });
+  await expect(page.locator('#sp-status')).toContainText('imported');
+  await expect(page.locator('.tree a')).toHaveCount(1);
+  expect(await page.locator('.tree a').getAttribute('href')).toBe('https://example.com/');
+});
+
+test('the Content-Security-Policy blocks nothing the page needs', async ({ page }) => {
+  const problems: string[] = [];
+  page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') problems.push(m.text()); });
+  page.on('pageerror', (e) => problems.push(String(e)));
+  await page.reload();
+  await page.locator('#sp-add-note').click();
+  await page.locator('#scheme-toggle').click();
+  await page.locator('#sp-edit').click();
+  expect(await page.locator('meta[http-equiv="Content-Security-Policy"]').count()).toBe(1);
+  expect(problems).toEqual([]);
 });
 
 test('imported text is never parsed as HTML', async ({ page }) => {
