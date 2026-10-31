@@ -5,28 +5,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; form-action https://www.google.com https://google.com; base-uri 'none'; object-src 'none'">
   <link rel="stylesheet" type="text/css" href="css/style.css">
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
   <title>💻</title>
   <!-- colours + day/night are applied here, before first paint (shared master: jcleal.me/static/js/palette.js) -->
   <script src="js/palette.js"></script>
   <script src="js/icons.js"></script>
-  <script>
-    Palette.init({
-      triggerId: 'palette-trigger',
-      popupId: 'palette-popup',
-      customIds: { primary: 'custom-primary', secondary: 'custom-secondary', reset: 'custom-reset', note: 'custom-note' },
-      toggleId: 'scheme-toggle',
-      onScheme: function (scheme, toggle) {
-        if (!toggle) return;
-        toggle.textContent = '';
-        toggle.appendChild(SPIcon(scheme === 'dark' ? 'moon' : 'sun'));
-        var l = document.createElement('span');
-        l.textContent = scheme === 'dark' ? 'Night' : 'Day';
-        toggle.appendChild(l);
-      }
-    });
-  </script>
+  <script src="js/init.js"></script>
 </head>
 
 <body>
