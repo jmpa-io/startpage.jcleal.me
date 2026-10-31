@@ -58,11 +58,11 @@
     // chroma: follows the pick (capped) so a grey pick gives a grey note; the extra slots use a fixed gentle chroma
     var cp = Math.min(0.09, Math.max(0.02, P.c * 0.5));
     var cs = Math.min(0.09, Math.max(0.02, S.c * 0.5));
-    var cw = dark ? 0.06 : 0.09;
+    var cw = dark ? 0.08 : 0.09;
     var slots = [
       [P.h, cp], [S.h, cs], [pull(95, P.h, 0.25), cw], [pull(145, S.h, 0.25), cw], [pull(350, P.h, 0.25), cw], [mix, (cp + cs) / 2]
     ];
-    var bg = dark ? 0.34 : 0.93, bar = dark ? 0.28 : 0.87, ink = dark ? 0.96 : 0.22;
+    var bg = dark ? 0.42 : 0.93, bar = dark ? 0.35 : 0.87, ink = dark ? 0.98 : 0.22;
     return slots.map(function (s) {
       return {
         bg: oklchToHex(bg, s[1], s[0]),
