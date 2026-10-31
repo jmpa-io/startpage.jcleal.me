@@ -91,15 +91,12 @@ export async function recordEarly(page: Page, probe: 'colour' | 'dark') {
 }
 
 // Removes CSS transitions/animations so computed colours are settled when read.
+// Uses a constructed stylesheet (CSSOM), which a strict style-src CSP does not block, unlike an inline <style>.
 export async function settleStyles(page: Page) {
   await page.addInitScript(() => {
-    const add = () => {
-      const st = document.createElement('style');
-      st.textContent = '*,*::before,*::after{transition:none!important;animation:none!important}';
-      document.documentElement.appendChild(st);
-    };
-    if (document.documentElement) add();
-    else new MutationObserver((_, o) => { if (document.documentElement) { o.disconnect(); add(); } }).observe(document, { childList: true });
+    const sheet = new CSSStyleSheet();
+    sheet.replaceSync('*,*::before,*::after{transition:none!important;animation:none!important}');
+    document.adoptedStyleSheets = [...document.adoptedStyleSheets, sheet];
   });
 }
 
