@@ -115,7 +115,9 @@ test('notes: add, type, recolour, drag, persist, delete', async ({ page }, info)
   await expect(note).toHaveClass(/sp-slot-4/);
 
   if (info.project.name === 'desktop') {
-    const b = (await note.locator('.sp-note-bar').boundingBox())!;
+    const bar = note.locator('.sp-note-bar');
+    await bar.hover(); // actionability waits for the note to stop moving before the box is measured.
+    const b = (await bar.boundingBox())!;
     const pos = () => note.evaluate((e) => [e.offsetLeft, e.offsetTop]);
     const n0 = await pos();
     await page.mouse.move(b.x + 120, b.y + 8);
