@@ -255,8 +255,10 @@ test.describe('terminal window', () => {
     const m = await page.locator('#sp-terminal').evaluate((e) => ({ s: e.scrollHeight, c: e.clientHeight }));
     expect(m.s).toBeGreaterThan(m.c);
     await page.locator('#sp-terminal').focus();
+    await expect(page.locator('#sp-terminal')).toBeFocused();
     await page.keyboard.press('End');
-    expect(await page.locator('#sp-terminal').evaluate((e) => e.scrollTop)).toBeGreaterThan(0);
+    // keyboard scrolling can be animated, so poll instead of reading once
+    await expect.poll(() => page.locator('#sp-terminal').evaluate((e) => e.scrollTop)).toBeGreaterThan(0);
     expect(await page.evaluate(() => document.documentElement.scrollTop)).toBe(0);
   });
 
