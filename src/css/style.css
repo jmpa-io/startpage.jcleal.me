@@ -6,38 +6,31 @@
 :root {
   --font: "Roboto Mono";
   --background: transparent;
-  --foreground: #1a1a1a;
-  --blue: #0a6a78;
-  --purple: #7a3a78;
-  --white: #fff;
-  --pink: #b01068;
-  --black: #090A0F;
-  --branch: 1px solid #a7a9be;
+  /* every colour below is derived from the Primary/Secondary pair by js/palette.js (--pal-*); fallbacks = default sunset, light */
+  --foreground: var(--pal-text, #1a1a1a);
+  --blue: var(--pal-link, #0a6a78);
+  --purple: var(--pal-heading, #7a3a78);
+  --pink: var(--pal-accent2, #b01068);
+  --white: var(--pal-btn-text, #fff);
+  --black: var(--pal-bg, #090A0F);
+  --branch: 1px solid var(--pal-border-strong, #a7a9be);
 }
 
 html {
   font-size: 14px;
   height: 100%;
-  background: radial-gradient(ellipse at bottom, #dfe6ee 0%, #f4f4f6 100%);
+  background: radial-gradient(ellipse at bottom, var(--pal-surface-2, #dfe6ee) 0%, var(--pal-bg, #f4f4f6) 100%);
   overflow: hidden;
 }
 
-/* dark is the terminal's native look — restores the original fixed-dark values */
-html.dark {
-  --foreground: #fffffe;
-  --blue: #4dbed0;
-  --purple: #d583d0;
-  --pink: #ff1e9c;
-  background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+::selection {
+  background: var(--pal-sel-bg, #b6d4ea);
+  color: var(--pal-sel-text, #000);
 }
 
-/* blue/purple/pink bridged from palette.css — tree/prompt/user colours track the
-   chosen palette; foreground stays neutral so body text keeps reading cleanly */
-html.ocean, html.forest, html.sunset, html.violet, html.yellow, html.grey, html.purple, html.crimson, html.teal,
-html.dark.ocean, html.dark.forest, html.dark.sunset, html.dark.violet, html.dark.yellow, html.dark.grey, html.dark.purple, html.dark.crimson, html.dark.teal {
-  --blue:   var(--pal-accent);
-  --purple: var(--pal-heading);
-  --pink:   var(--pal-accent-hover);
+:focus-visible {
+  outline: 2px solid var(--pal-focus, #0a6a78);
+  outline-offset: 2px;
 }
 
 body {
@@ -128,8 +121,8 @@ a {
 }
 
 a:hover {
-  color: var(--black);
-  background: var(--white);
+  color: var(--pal-btn-text, #fff);
+  background: var(--pal-btn, #0a6a78);
 }
 
 form h1 {
@@ -184,13 +177,15 @@ input {
 .palette-popup {
   display: none;
   position: absolute;
-  top: 1.5rem;
+  top: 1.75rem;
   right: 0;
   flex-direction: column;
-  gap: 0.25rem;
-  background: var(--black);
-  border: 1px solid #a7a9be;
-  padding: 0.5rem 0.75rem;
+  gap: 0.5rem;
+  background: var(--pal-surface, #fff);
+  color: var(--foreground);
+  border: 1px solid var(--pal-border-strong, #a7a9be);
+  padding: 0.6rem 0.75rem;
+  max-width: calc(100vw - 2rem);
   white-space: nowrap;
 }
 
@@ -198,23 +193,41 @@ input {
   display: flex;
 }
 
-.palette-btn {
+.palette-popup label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.palette-popup input[type="color"] {
+  width: 2.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 1px solid var(--pal-border-strong, #a7a9be);
   background: none;
+  cursor: pointer;
+}
+
+.custom-reset {
+  background: var(--pal-btn, #0a6a78);
+  color: var(--pal-btn-text, #fff);
   border: none;
-  color: var(--foreground);
   font-family: var(--font);
   font-size: 0.9rem;
-  text-align: left;
+  padding: 0.25rem 0.5rem;
   cursor: pointer;
-  padding: 0;
 }
 
-.palette-btn:hover,
-.palette-btn.active {
-  color: var(--white);
-  background: #ffffff1a;
+.custom-note {
+  display: block;
+  max-width: 14rem;
+  white-space: normal;
+  font-size: 0.75rem;
+  color: var(--pal-muted, #555);
 }
 
-.palette-swatch {
-  display: inline-block;
+.custom-note:empty {
+  display: none;
 }
