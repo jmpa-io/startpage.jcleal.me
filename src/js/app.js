@@ -361,10 +361,29 @@
     handle.addEventListener('pointercancel', end);
   }
 
-  drag(bar, win, function (x, y) {
+  // Keyboard alternative to dragging: arrow keys on the focused handle itself (Shift = bigger steps).
+  function keyMove(handle, origin, onMove, onEnd, enabled) {
+    handle.tabIndex = 0;
+    handle.addEventListener('keydown', function (e) {
+      if (e.target !== handle || narrow.matches || (enabled && !enabled())) return;
+      var step = e.shiftKey ? 64 : 16;
+      var d = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+      if (!d) return;
+      e.preventDefault();
+      var o = origin();
+      onMove(o.x + d[0], o.y + d[1]);
+      onEnd();
+    });
+  }
+
+  function moveWin(x, y) {
     var g = geometry();
     setFrame({ x: Math.min(Math.max(0, x), Math.max(0, window.innerWidth - g.w)), y: Math.min(Math.max(0, y), Math.max(0, window.innerHeight - g.h)), w: g.w, h: g.h });
-  }, persist, 'button', function () { return !frame().max; });
+  }
+  function notMax() { return !frame().max; }
+  drag(bar, win, moveWin, persist, 'button', notMax);
+  bar.setAttribute('aria-label', 'Window title bar: arrow keys move the window');
+  keyMove(bar, function () { var g = geometry(); return { x: g.x, y: g.y }; }, moveWin, persist, notMax);
 
   // New frame when the `dir` edge(s) of the box `s` move by (dx, dy); stays within the viewport and above the minimum size.
   function resized(s, dir, dx, dy) {
@@ -522,6 +541,13 @@
       n.style.left = p.x + 'px';
       n.style.top = p.y + 'px';
     }, persist, 'button');
+    hd.setAttribute('aria-label', 'Note header: arrow keys move the note');
+    keyMove(hd, function () { return { x: t.x, y: t.y }; }, function (x, y) {
+      var p = clampWin(x, y);
+      S.ops.updateNote(doc, t.id, { x: p.x, y: p.y });
+      n.style.left = p.x + 'px';
+      n.style.top = p.y + 'px';
+    }, persist);
 
     function size(w, h) {
       w = Math.max(S.NOTE_MIN.w, Math.min(800, Math.round(w)));

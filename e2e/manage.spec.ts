@@ -167,6 +167,27 @@ test('invalid import is rejected and leaves the data untouched', async ({ page }
   await expect(page.locator('.tree a')).toHaveCount(21);
 });
 
+test('keyboard can move the window and a note (alternative to dragging)', async ({ page }, info) => {
+  test.skip(desktopOnly(info.project.name), 'move is disabled on mobile');
+  const win = page.locator('#sp-window');
+  const before = (await win.boundingBox())!;
+  await page.locator('#sp-bar').focus();
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('Shift+ArrowDown');
+  const after = (await win.boundingBox())!;
+  expect(Math.round(after.x - before.x)).toBe(16);
+  expect(Math.round(after.y - before.y)).toBe(64);
+  await page.locator('#sp-add-note').click();
+  const note = page.locator('.sp-note').first();
+  const nb = (await note.boundingBox())!;
+  await note.locator('.sp-note-bar').focus();
+  await page.keyboard.press('ArrowLeft');
+  await page.keyboard.press('ArrowDown');
+  const na = (await note.boundingBox())!;
+  expect(Math.abs(na.y - nb.y - 16)).toBeLessThanOrEqual(2); // the tilt straightens on focus, so allow a pixel or so
+  expect(Math.round(na.x - nb.x)).toBeLessThanOrEqual(0);
+});
+
 test('imported javascript:/data: links are dropped, not rendered', async ({ page }) => {
   const doc = { version: 1, window: null, notes: [], groups: [{ id: 'g1', name: 'x', links: [
     { id: 'a', name: 'bad', url: 'javascript:alert(1)' }, { id: 'b', name: 'bad2', url: 'data:text/html,<b>' },
