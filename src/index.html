@@ -10,6 +10,7 @@
   <title>💻</title>
   <!-- colours + day/night are applied here, before first paint (shared master: jcleal.me/static/js/palette.js) -->
   <script src="js/palette.js"></script>
+  <script src="js/icons.js"></script>
   <script>
     Palette.init({
       triggerId: 'palette-trigger',
@@ -18,7 +19,11 @@
       toggleId: 'scheme-toggle',
       onScheme: function (scheme, toggle) {
         if (!toggle) return;
-        toggle.textContent = scheme === 'dark' ? '[night]' : '[day]';
+        toggle.textContent = '';
+        toggle.appendChild(SPIcon(scheme === 'dark' ? 'moon' : 'sun'));
+        var l = document.createElement('span');
+        l.textContent = scheme === 'dark' ? 'Night' : 'Day';
+        toggle.appendChild(l);
       }
     });
   </script>
@@ -26,9 +31,9 @@
 
 <body>
   <div class="jc-controls">
-    <button class="scheme-toggle" id="scheme-toggle" type="button" aria-label="Toggle day/night" title="Toggle day/night">[night]</button>
+    <button class="sp-btn scheme-toggle" id="scheme-toggle" type="button" aria-label="Toggle day/night" title="Toggle day/night">Day</button>
     <div class="palette-wrap">
-      <button class="palette-trigger" id="palette-trigger" type="button" aria-label="Colours" aria-haspopup="true" aria-expanded="false" title="Colours">[colours]</button>
+      <button class="sp-btn palette-trigger" id="palette-trigger" type="button" aria-label="Colours" aria-haspopup="true" aria-expanded="false" title="Colours" data-ico="palette"><span>Colours</span></button>
       <div class="palette-popup" id="palette-popup" role="dialog" aria-label="Colours">
         <label>Primary <input type="color" id="custom-primary" value="#c04828"></label>
         <label>Secondary <input type="color" id="custom-secondary" value="#2f7fae"></label>
@@ -39,31 +44,67 @@
   </div>
 
   <!-- the links, groups and notes are rendered by js/app.js from js/store.js (localStorage "startpage.v1") -->
-  <main class="sp-window" id="sp-window" aria-label="start page">
+  <main class="sp-window" id="sp-window" aria-label="start page terminal">
     <div class="sp-bar" id="sp-bar">
-      <span class="sp-title">jcleal@home ~</span>
+      <span class="sp-title"><span class="sp-title-ico" data-ico="arch" aria-hidden="true"></span>jcleal@archlinux:~</span>
+      <span class="sp-wbtns">
+        <button type="button" class="sp-wbtn" id="sp-min" aria-label="Collapse window to its title bar" title="Collapse" data-ico="min"></button>
+        <button type="button" class="sp-wbtn" id="sp-max" aria-label="Maximise window" title="Maximise" data-ico="max"></button>
+        <button type="button" class="sp-wbtn sp-wclose" id="sp-close" aria-label="Close window (restore from the chip)" title="Close" data-ico="close"></button>
+      </span>
     </div>
     <div class="sp-tools" role="toolbar" aria-label="Start page tools">
-      <button type="button" class="sp-tool" id="sp-edit" aria-pressed="false">[edit]</button>
-      <button type="button" class="sp-tool" id="sp-add-note">[+note]</button>
-      <button type="button" class="sp-tool" id="sp-export">[export]</button>
-      <button type="button" class="sp-tool" id="sp-import-btn">[import]</button>
+      <button type="button" class="sp-btn" id="sp-edit" aria-pressed="false" data-ico="pencil"><span>Edit</span></button>
+      <button type="button" class="sp-btn sp-add-link" id="sp-add-link" data-ico="plus"><span>Link</span></button>
+      <button type="button" class="sp-btn sp-add-group" id="sp-add-group" data-ico="group"><span>Group</span></button>
+      <button type="button" class="sp-btn" id="sp-add-note" data-ico="note"><span>Note</span></button>
+      <span class="sp-sep" aria-hidden="true"></span>
+      <button type="button" class="sp-btn" id="sp-export" data-ico="download"><span>Export</span></button>
+      <button type="button" class="sp-btn" id="sp-import-btn" data-ico="upload"><span>Import</span></button>
+      <button type="button" class="sp-btn" id="sp-reset-layout" data-ico="reset" title="Reset window position and size"><span>Reset layout</span></button>
       <input type="file" id="sp-import" accept="application/json,.json" hidden aria-label="Import JSON file">
     </div>
-    <div class="terminal">
-      <div class="prompt">[<span class="user">jcleal</span>@<span>home</span> ~]$ tree</div>
+    <div class="sp-panel" id="sp-panel"></div>
+    <div class="terminal" id="sp-terminal" tabindex="0" role="region" aria-label="terminal output">
+      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> neofetch</div>
+      <div class="neofetch">
+        <pre class="logo" aria-hidden="true">      /\
+     /  \
+    /\   \
+   /      \
+  /   ,,   \
+ /   |  |  -\
+/_-''    ''-_\</pre>
+        <div class="facts" id="sp-facts"></div>
+      </div>
+      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> tree</div>
       <div class="tree" id="sp-tree"></div>
       <noscript><p>This page needs JavaScript to show your links.</p></noscript>
-      <div class="prompt">[<span class="user">jcleal</span>@<span>home</span> ~]$ google</div>
-      <form action="https://google.com/search" method="GET">
+      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> google</div>
+      <form action="https://google.com/search" method="GET" class="sp-search">
         <h1>search: </h1>
         <input type="text" name="q" autofocus="autofocus" aria-label="search" />
       </form>
+      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> <span class="cursor" aria-hidden="true"></span></div>
     </div>
-    <div class="sp-status" id="sp-status" role="status"></div>
+    <div class="sp-statusbar">
+      <span class="sb-ws" aria-hidden="true"><b>[start]</b> 0:links*</span>
+      <span class="sb-msg" id="sp-status" role="status"></span>
+      <span class="sb-clock" id="sp-clock" aria-hidden="true"></span>
+    </div>
+    <div class="sp-grip sp-grip-n" data-grip="n" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize window from the top edge (arrow keys)"></div>
+    <div class="sp-grip sp-grip-s" data-grip="s" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize window from the bottom edge (arrow keys)"></div>
+    <div class="sp-grip sp-grip-e" data-grip="e" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize window from the right edge (arrow keys)"></div>
+    <div class="sp-grip sp-grip-w" data-grip="w" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize window from the left edge (arrow keys)"></div>
+    <div class="sp-grip sp-grip-ne" data-grip="ne" role="separator" tabindex="0" aria-label="Resize window from the top-right corner (arrow keys)"></div>
+    <div class="sp-grip sp-grip-nw" data-grip="nw" role="separator" tabindex="0" aria-label="Resize window from the top-left corner (arrow keys)"></div>
+    <div class="sp-grip sp-grip-se" data-grip="se" role="separator" tabindex="0" aria-label="Resize window from the bottom-right corner (arrow keys)"></div>
+    <div class="sp-grip sp-grip-sw" data-grip="sw" role="separator" tabindex="0" aria-label="Resize window from the bottom-left corner (arrow keys)"></div>
   </main>
+  <button type="button" class="sp-btn sp-chip" id="sp-chip" hidden data-ico="restore"><span>jcleal@archlinux: ~</span></button>
   <div class="sp-notes" id="sp-notes"></div>
 
+  <script src="js/note-colours.js"></script>
   <script src="js/store.js"></script>
   <script src="js/app.js"></script>
 </body>
