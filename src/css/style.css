@@ -37,21 +37,224 @@ body {
   background: var(--background);
 }
 
-.terminal {
+/* the window: flat terminal body inside a Win98-style frame, themed by the shared palette */
+.sp-window {
   position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 24px);
+  background: var(--pal-surface, #fff);
+  color: var(--foreground);
+  border: 2px solid;
+  border-color: var(--pal-face-hi, #fff) var(--pal-face-shadow, #555) var(--pal-face-shadow, #555) var(--pal-face-hi, #fff);
+  box-shadow: 0 0 0 1px var(--pal-border-strong, #a7a9be), 4px 4px 0 rgba(0, 0, 0, 0.18);
+}
+
+.sp-window.dragging,
+.sp-note.dragging {
+  user-select: none;
+}
+
+.sp-bar {
+  background-color: var(--pal-title-a, #6a2c18);
+  background-image: linear-gradient(90deg, var(--pal-title-a, #6a2c18), var(--pal-title-b, #2f4f7a));
+  color: #fff;
+  padding: 0.3rem 0.6rem;
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+}
+
+.sp-bar .sp-title {
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.9rem;
+}
+
+.sp-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  padding: 0.3rem 0.6rem;
+  border-bottom: 1px solid var(--pal-border-strong, #a7a9be);
+}
+
+.sp-tool,
+.sp-b {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0 0.2rem;
+}
+
+.sp-tool:hover,
+.sp-b:hover {
+  color: var(--pal-btn-text, #fff);
+  background: var(--pal-btn, #0a6a78);
+}
+
+.sp-tool[aria-pressed="true"] {
+  text-decoration: underline;
+}
+
+.terminal {
   background-color: var(--background);
-  top: 0;
-  left: 0;
   padding: 20px;
-  overflow-x: hidden;
+  overflow: auto;
+  min-height: 0;
+}
+
+.sp-status {
+  min-height: 1.2rem;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+  color: var(--pal-muted, #555);
+  border-top: 1px solid var(--pal-border-strong, #a7a9be);
+}
+
+.sp-ctl {
+  margin-left: 0.5rem;
+  white-space: nowrap;
+}
+
+.sp-form {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.sp-form input {
+  border: 1px solid var(--pal-border-strong, #a7a9be);
+  background: var(--pal-surface, #fff);
+  padding: 0.15rem 0.3rem;
+  font-size: 0.85rem;
+  width: 11rem;
+  max-width: 100%;
+}
+
+.sp-add {
+  padding-left: 0.2rem;
+}
+
+/* post-it notes: fixed pastel + dark text so contrast holds in both schemes */
+.sp-notes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
   z-index: 1;
 }
 
-.main {
+.sp-note {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%)
+  width: 200px;
+  pointer-events: auto;
+  color: #1a1a1a;
+  box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.sp-note-yellow { background: #fff3a3; }
+.sp-note-pink { background: #ffc9de; }
+.sp-note-green { background: #c6f0c2; }
+.sp-note-blue { background: #c4e1fa; }
+
+.sp-note-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.15rem 0.3rem;
+  background: rgba(0, 0, 0, 0.12);
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+}
+
+.sp-note .sp-b {
+  color: #1a1a1a;
+}
+
+.sp-note .sp-b:hover {
+  color: #fff;
+  background: #1a1a1a;
+}
+
+.sp-colours {
+  display: inline-flex;
+  gap: 0.3rem;
+}
+
+.sp-colour {
+  width: 1rem;
+  height: 1rem;
+  padding: 0;
+  border: 1px solid #1a1a1a;
+  border-radius: 50%;
+}
+
+.sp-colour-yellow { background: #fff3a3; }
+.sp-colour-pink { background: #ffc9de; }
+.sp-colour-green { background: #c6f0c2; }
+.sp-colour-blue { background: #c4e1fa; }
+
+.sp-colour[aria-pressed="true"] {
+  outline: 2px solid #1a1a1a;
+  outline-offset: 1px;
+}
+
+.sp-note-text {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  background: transparent;
+  color: #1a1a1a;
+  border: none;
+  resize: vertical;
+  font-family: var(--font);
+  font-size: 0.9rem;
+  padding: 0.4rem;
+}
+
+@media (max-width: 720px) {
+  html {
+    overflow: auto;
+    height: auto;
+    min-height: 100%;
+  }
+
+  .sp-window {
+    position: static;
+    margin: 3rem 0.5rem 0.5rem;
+    max-width: none;
+    max-height: none !important;
+  }
+
+  .sp-bar {
+    cursor: default;
+  }
+
+  .sp-notes {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0 0.5rem 1rem;
+  }
+
+  .sp-note {
+    position: static;
+    width: auto;
+  }
+
+  .sp-note-bar {
+    cursor: default;
+  }
 }
 
 .prompt {
