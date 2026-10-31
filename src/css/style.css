@@ -120,6 +120,16 @@ a {
   outline: none;
 }
 
+.gh-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.gh-mark {
+  flex: none;
+}
+
 a:hover {
   color: var(--pal-btn-text, #fff);
   background: var(--pal-btn, #0a6a78);
