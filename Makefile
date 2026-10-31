@@ -29,6 +29,11 @@ sync: ## Syncs website content to AWS S3.
 sync:
 	aws s3 sync --delete dist/ s3://$(UPLOAD_BUCKET)/
 
+e2e: ## Runs the Playwright screenshot + interaction tests against src/.
+	cd e2e && npm ci && npx playwright test
+
+PHONY += e2e
+
 # ---
 
 # Includes the common Makefile.
