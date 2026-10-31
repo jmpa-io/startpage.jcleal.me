@@ -354,3 +354,39 @@ describe('popup wiring', () => {
     expect(P.note()).toBe('');
   });
 });
+
+describe('Palette.init({ defaults })', () => {
+  const NAVY = { primary: '#0a2a6b', secondary: '#2f7fae' };
+
+  it('replaces the default pair for get(), vars, inputs and reset', async () => {
+    document.body.innerHTML = '<input id="a"><input id="b"><button id="r"></button>';
+    const P = await loadPalette();
+    P.init({ defaults: NAVY, customIds: { primary: 'a', secondary: 'b', reset: 'r' } });
+    document.dispatchEvent(new window.Event('DOMContentLoaded'));
+    expect(P.DEFAULT).toEqual(NAVY);
+    expect(P.get().custom).toBe(false);
+    expect(root().style.getPropertyValue('--pal-primary')).toBe('#0a2a6b');
+    expect(document.getElementById('a').value).toBe('#0a2a6b');
+    P.set({ primary: '#008080', secondary: '#ff69b4' });
+    document.getElementById('r').click();
+    expect(localStorage.getItem('palette-custom')).toBeNull();
+    expect(document.getElementById('a').value).toBe('#0a2a6b');
+    expect(root().style.getPropertyValue('--pal-primary')).toBe('#0a2a6b');
+  });
+
+  it('keeps sunset without the option, and ignores an invalid option', async () => {
+    let P = await loadPalette();
+    P.init({});
+    expect(root().style.getPropertyValue('--pal-primary')).toBe('#c04828');
+    P = await loadPalette();
+    P.init({ defaults: { primary: 'navy', secondary: '#2f7fae' } });
+    expect(P.DEFAULT.primary).toBe('#c04828');
+  });
+
+  it('still maps legacy presets to their pairs', async () => {
+    localStorage.setItem('palette', 'sunset');
+    const P = await loadPalette();
+    P.init({ defaults: NAVY });
+    expect(stored()).toEqual({ primary: '#c04828', secondary: '#2f7fae' });
+  });
+});

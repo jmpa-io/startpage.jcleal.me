@@ -17,7 +17,7 @@
   var LEGACY = {
     ocean:   { primary: '#007baf', secondary: '#cd4805' },
     forest:  { primary: '#007500', secondary: '#b243ba' },
-    sunset:  DEFAULT,
+    sunset:  { primary: '#c04828', secondary: '#2f7fae' },
     violet:  { primary: '#4315c9', secondary: '#9c8600' },
     yellow:  { primary: '#ad6a00', secondary: '#0559d2' },
     grey:    { primary: '#2e657e', secondary: '#976346' },
@@ -220,6 +220,11 @@
     },
     init: function (opts) {
       opts = opts || {};
+      // Per-page default pair (Reset, "nothing stored", input initial values); the shared master keeps sunset otherwise.
+      if (isValid(opts.defaults)) {
+        DEFAULT = { primary: opts.defaults.primary.toLowerCase(), secondary: opts.defaults.secondary.toLowerCase() };
+        Palette.DEFAULT = DEFAULT;
+      }
       var schemeKey = opts.schemeKey || 'scheme';
       var toggleId = opts.toggleId;
       var customIds = opts.customIds; // { primary, secondary, reset, note } (all optional ids)

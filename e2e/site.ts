@@ -5,6 +5,7 @@ export const site: {
   name: string;
   port: number;
   siteDir: string;
+  defaults?: [string, string]; // [primary, secondary] default pair when it differs from sunset.
   snapshotTemplate?: string;
   projects: NonNullable<PlaywrightTestConfig['projects']>;
   sel: { trigger: string; popup: string; primary: string; secondary: string; reset: string; note: string; toggle: string };
