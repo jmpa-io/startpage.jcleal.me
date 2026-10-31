@@ -275,6 +275,12 @@
   tick();
   setInterval(tick, 15000);
 
+  // focus search on desktop only: on mobile it would scroll the page to the bottom and pop the keyboard
+  if (!narrow.matches) {
+    var q = win.querySelector('input[name=q]');
+    if (q) q.focus({ preventScroll: true });
+  }
+
   function focusForm() {
     var i = win.querySelector('.sp-form input');
     if (i) i.focus();
