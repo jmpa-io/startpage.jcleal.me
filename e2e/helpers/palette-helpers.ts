@@ -21,8 +21,8 @@ export const contrast = (a: number[], b: number[]) => {
   return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
 };
 
-// Colour pairs used for sweeps and screenshots.
-export const DEFAULT_PAIR: [string, string] = ['#c04828', '#2f7fae'];
+// Colour pairs used for sweeps and screenshots. The default pair is per-site (site.defaults); sunset when a site sets none.
+export const DEFAULT_PAIR: [string, string] = site.defaults ?? ['#c04828', '#2f7fae'];
 export const SWEEP: [string, string][] = [
   DEFAULT_PAIR,
   ['#008080', '#ff69b4'],
