@@ -11,7 +11,11 @@ const types = {
   '.woff2': 'font/woff2', '.xml': 'application/xml', '.txt': 'text/plain',
 };
 
-createServer(async (req, res) => {
+const die = (msg) => { console.error(`server.mjs: ${msg}`); process.exit(1); };
+
+if (!(await stat(root).catch(() => null))?.isDirectory()) die(`build directory ${root} is missing; build the site first (or set SITE_DIR).`);
+
+const server = createServer(async (req, res) => {
   try {
     let path = normalize(decodeURIComponent(new URL(req.url, 'http://x').pathname));
     let file = join(root, path);
@@ -24,4 +28,10 @@ createServer(async (req, res) => {
     res.writeHead(404, { 'content-type': 'text/plain' });
     res.end('not found');
   }
-}).listen(port, () => console.log(`serving ${root} on :${port}`));
+});
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') die(`port ${port} is already in use by another process; free it or pick another with E2E_PORT.`);
+  die(err.message);
+});
+server.listen(port, () => console.log(`serving ${root} on :${port}`));
