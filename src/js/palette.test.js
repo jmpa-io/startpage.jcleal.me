@@ -362,6 +362,18 @@ describe('shared colour panel', () => {
   }
   const card = (s) => document.querySelector(`.pm-card[data-scheme="${s}"]`);
 
+  it('mounts into any host and destroy() stops it syncing', async () => {
+    document.body.innerHTML = '<div id="h"></div>';
+    const Palette = await loadPalette();
+    const panel = Palette.mountPanel(document.getElementById('h'), { primary: 'a', secondary: 'b' });
+    expect(document.getElementById('a-hex').textContent).toBe('#c04828');
+    Palette.set({ primary: '#118833', secondary: '#aa22cc' });
+    expect(document.getElementById('a-hex').textContent).toBe('#118833');
+    panel.destroy();
+    Palette.set({ primary: '#cc2200', secondary: '#aa22cc' });
+    expect(document.getElementById('a-hex').textContent).toBe('#118833');
+  });
+
   it('turns the popup into a labelled dialog and builds Day/Night preview cards, rows and a preview', async () => {
     await boot();
     const p = document.getElementById('p');
