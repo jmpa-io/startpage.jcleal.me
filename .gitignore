@@ -5,6 +5,9 @@
 out
 test.sh
 node_modules
+e2e/node_modules
+e2e/test-results
+e2e/playwright-report
 
 # ignore log files.
 super-linter.log
