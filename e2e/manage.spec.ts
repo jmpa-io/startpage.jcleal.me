@@ -285,7 +285,7 @@ test.describe('terminal window', () => {
     const dark = await lum();
     expect(light).toBeLessThan(70);
     expect(dark).toBeLessThan(70);
-    await expect(page.locator('.prompt').first()).toContainText('[jcleal@archlinux ~]$ neofetch');
+    await expect(page.locator('#sp-neo-win .prompt').first()).toContainText('[jcleal@archlinux ~]$ neofetch');
     await expect(page.locator('.logo')).toBeAttached();
     await expect(page.locator('#sp-facts')).toContainText('Links21');
     await expect(page.locator('#sp-facts')).toContainText('Groups2');
@@ -395,9 +395,9 @@ test.describe('terminal window', () => {
     await expect(page.locator('#sp-max')).toHaveAttribute('aria-label', 'Restore window size');
     await page.reload();
     expect(await rect(page)).toEqual({ x: 0, y: 0, w: 1280, h: 800 });
-    await page.locator('.sp-title').dblclick();
+    await page.locator('#sp-bar .sp-title').dblclick();
     expect(await rect(page)).toEqual(before);
-    await page.locator('.sp-title').dblclick();
+    await page.locator('#sp-bar .sp-title').dblclick();
     expect((await rect(page)).w).toBe(1280);
     await page.locator('#sp-max').click();
     expect(await rect(page)).toEqual(before);
