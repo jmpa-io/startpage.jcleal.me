@@ -6,6 +6,8 @@ on:
       - '.github/workflows/cicd.yml'
       - 'cf/**'
       - 'src/**'
+      - 'package*.json'
+      - 'vitest.config.js'
       - 'Makefile*'
   workflow_dispatch:
   repository_dispatch:
@@ -40,13 +42,31 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  test:
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout.
+        uses: actions/checkout@v4
+
+      - name: Setup node.
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      # The Playwright e2e suite is not run here: its screenshot baselines are
+      # macOS-rendered and would differ on a Linux runner.
+      - name: Run unit tests.
+        run: npm ci && npm test
+
   # NOTE: CI deliberately does not deploy or sync this site. The live CloudFormation stack (startpage-jcleal-me) predates the
   # template in cf/ (different logical IDs, fixed-name resources), so deploying over it would fail the
   # existence check, or replace live resources if it ever passed. Migrate the live stack (resource import)
   # before re-adding a deploy job.
 
   post-to-slack:
-    needs: [lint, build-website]
+    needs: [lint, build-website, test]
     if: always()
     uses: jmpa-io/pipelines/.github/workflows/99-post-to-slack.yml@7778d436a95a3f61fe6416e7219502afd8ccb5d9 # v1.0.0
     with:
