@@ -317,9 +317,12 @@ body {
 
 .logo {
   flex: none;
+  width: 128px;
+  height: 128px;
   margin: 0;
-  color: var(--tm-accent);
-  font: 700 0.93rem/1.2 var(--mono);
+  image-rendering: pixelated;
+  border: 1px solid var(--tm-line);
+  border-radius: 3px;
 }
 
 .facts {
@@ -851,67 +854,27 @@ a:hover {
   position: absolute;
   top: 2.5rem;
   right: 0;
-  flex-direction: column;
-  gap: 0.5rem;
-  background: var(--pal-surface, #fff);
-  color: var(--pal-text, #1a1a1a);
-  border: 1px solid var(--pal-border-strong, #a7a9be);
-  border-radius: 4px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  padding: 0.6rem 0.75rem;
+  z-index: 8;
+  width: 21rem;
   max-width: calc(100vw - 2rem);
-  white-space: nowrap;
-  font: 0.9rem var(--ui);
+  /* shared colour panel (palette.js) wears the terminal's colours */
+  --pm-fg: var(--tm-fg);
+  --pm-bg: var(--tm-bar);
+  --pm-border: var(--tm-line);
+  --pm-radius: 4px;
+  --pm-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --pm-font: var(--mono);
+  --pm-fs: 0.85rem;
+  --pm-muted: var(--tm-muted);
+  --pm-heading: var(--tm-accent);
+  --pm-ctl-bg: var(--tm-field);
+  --pm-ctl-border: var(--tm-line);
+  --pm-ctl-radius: 3px;
+  --pm-accent: var(--tm-accent);
 }
 
 .palette-popup.open {
-  display: flex;
-}
-
-.palette-popup label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-}
-
-.palette-popup input[type="color"] {
-  width: 2.5rem;
-  height: 1.5rem;
-  padding: 0;
-  border: 1px solid var(--pal-border-strong, #a7a9be);
-  background: none;
-  cursor: pointer;
-}
-
-.custom-reset {
-  font: 500 0.85rem var(--ui);
-  color: var(--pal-btn-text, #fff);
-  background: var(--pal-btn, #0a6a78);
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 0.3rem 0.6rem;
-  cursor: pointer;
-}
-
-.custom-reset:hover {
-  filter: brightness(1.12);
-}
-
-.custom-reset:active {
-  transform: translateY(1px);
-}
-
-.custom-note {
   display: block;
-  max-width: 14rem;
-  white-space: normal;
-  font-size: 0.75rem;
-  color: var(--pal-muted, #555);
-}
-
-.custom-note:empty {
-  display: none;
 }
 
 /* ── mobile: the window is full width and in the page flow; notes stack below ── */
@@ -996,11 +959,12 @@ a:hover {
 
 @media (max-width: 480px) {
   .logo {
-    display: none;
+    width: 64px;
+    height: 64px;
   }
 
   .neofetch {
-    gap: 0;
+    gap: 0.75rem;
   }
 
   .sb-clock {
