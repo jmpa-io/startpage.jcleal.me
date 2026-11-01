@@ -8,6 +8,17 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; form-action https://www.google.com https://google.com; base-uri 'none'; object-src 'none'">
   <link rel="stylesheet" type="text/css" href="css/style.css">
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon-64x64.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="💻" />
+  <meta property="og:url" content="https://startpage.jcleal.me/" />
+  <meta property="og:image" content="https://startpage.jcleal.me/img/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://startpage.jcleal.me/img/og-image.png" />
   <title>💻</title>
   <!-- colours + day/night are applied here, before first paint (shared master: jcleal.me/static/js/palette.js) -->
   <script src="js/palette.js"></script>
@@ -20,12 +31,7 @@
     <button class="sp-btn scheme-toggle" id="scheme-toggle" type="button" aria-label="Toggle day/night" title="Toggle day/night">Day</button>
     <div class="palette-wrap">
       <button class="sp-btn palette-trigger" id="palette-trigger" type="button" aria-label="Colours" aria-haspopup="true" aria-expanded="false" title="Colours" data-ico="palette"><span>Colours</span></button>
-      <div class="palette-popup" id="palette-popup" role="dialog" aria-label="Colours">
-        <label>Primary <input type="color" id="custom-primary" value="#c04828"></label>
-        <label>Secondary <input type="color" id="custom-secondary" value="#2f7fae"></label>
-        <button type="button" class="custom-reset" id="custom-reset">Reset</button>
-        <span class="custom-note" id="custom-note" role="status"></span>
-      </div>
+      <div class="palette-popup" id="palette-popup"></div>
     </div>
   </div>
 
@@ -54,13 +60,7 @@
     <div class="terminal" id="sp-terminal" tabindex="0" role="region" aria-label="terminal output">
       <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> neofetch</div>
       <div class="neofetch">
-        <pre class="logo" aria-hidden="true">      /\
-     /  \
-    /\   \
-   /      \
-  /   ,,   \
- /   |  |  -\
-/_-''    ''-_\</pre>
+        <img class="logo" src="img/logo-256.png" alt="jmpa hoodie logo" width="128" height="128" />
         <div class="facts" id="sp-facts"></div>
       </div>
       <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> tree</div>
