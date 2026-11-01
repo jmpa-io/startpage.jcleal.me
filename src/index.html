@@ -50,6 +50,7 @@
       <button type="button" class="sp-btn sp-add-link" id="sp-add-link" data-ico="plus"><span>Link</span></button>
       <button type="button" class="sp-btn sp-add-group" id="sp-add-group" data-ico="group"><span>Group</span></button>
       <button type="button" class="sp-btn" id="sp-add-note" data-ico="note"><span>Note</span></button>
+      <button type="button" class="sp-btn" id="sp-neo-toggle" aria-pressed="true" data-ico="arch"><span>Neofetch</span></button>
       <span class="sp-sep" aria-hidden="true"></span>
       <button type="button" class="sp-btn" id="sp-export" data-ico="download"><span>Export</span></button>
       <button type="button" class="sp-btn" id="sp-import-btn" data-ico="upload"><span>Import</span></button>
@@ -58,11 +59,6 @@
     </div>
     <div class="sp-panel" id="sp-panel"></div>
     <div class="terminal" id="sp-terminal" tabindex="0" role="region" aria-label="terminal output">
-      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> neofetch</div>
-      <div class="neofetch">
-        <img class="logo" src="img/logo-256.png" alt="jmpa hoodie logo" width="128" height="128" />
-        <div class="facts" id="sp-facts"></div>
-      </div>
       <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> tree</div>
       <div class="tree" id="sp-tree"></div>
       <noscript><p>This page needs JavaScript to show your links.</p></noscript>
@@ -87,11 +83,27 @@
     <div class="sp-grip sp-grip-se" data-grip="se" role="separator" tabindex="0" aria-label="Resize window from the bottom-right corner (arrow keys)"></div>
     <div class="sp-grip sp-grip-sw" data-grip="sw" role="separator" tabindex="0" aria-label="Resize window from the bottom-left corner (arrow keys)"></div>
   </main>
+  <aside class="sp-window sp-neo-win" id="sp-neo-win" aria-label="neofetch window">
+    <div class="sp-bar" id="sp-neo-bar">
+      <span class="sp-title"><span class="sp-title-ico" data-ico="arch" aria-hidden="true"></span>neofetch</span>
+      <span class="sp-wbtns">
+        <button type="button" class="sp-wbtn sp-wclose" id="sp-neo-close" aria-label="Close neofetch window" title="Close" data-ico="close"></button>
+      </span>
+    </div>
+    <div class="terminal sp-neo-body">
+      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> neofetch</div>
+      <div class="neofetch">
+        <img class="logo" src="img/logo-256.png" alt="jmpa hoodie logo" width="128" height="128" />
+        <div class="facts" id="sp-facts"></div>
+      </div>
+    </div>
+  </aside>
   <button type="button" class="sp-btn sp-chip" id="sp-chip" hidden data-ico="restore"><span>jcleal@archlinux: ~</span></button>
   <div class="sp-notes" id="sp-notes"></div>
 
   <script src="js/note-colours.js"></script>
   <script src="js/store.js"></script>
+  <script src="js/brands.js"></script>
   <script src="js/app.js"></script>
 </body>
 
