@@ -503,10 +503,16 @@
     $('sp-logo-btn').dataset.theme = LOGO_THEMES[logoIdx];
   }
   showLogo();
-  $('sp-logo-btn').addEventListener('click', function () {
-    logoIdx = (logoIdx + 1) % LOGO_THEMES.length;
+  function stepLogo(dir) {
+    logoIdx = (logoIdx + dir + LOGO_THEMES.length) % LOGO_THEMES.length;
     showLogo();
     try { localStorage.setItem(LOGO_KEY, LOGO_THEMES[logoIdx]); } catch (e) { /* ignore */ }
+  }
+  $('sp-logo-btn').addEventListener('click', function () { stepLogo(1); });
+  // right-click goes back one theme instead of opening the browser menu
+  $('sp-logo-btn').addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    stepLogo(-1);
   });
 
   // ---- notes ----

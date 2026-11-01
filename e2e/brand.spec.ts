@@ -66,4 +66,8 @@ test('clicking the neofetch hoodie cycles through the six themed tiles and remem
   await btn.click();
   await page.reload();
   await expect(btn).toHaveAttribute('data-theme', 'night');
+  await btn.click({ button: 'right' });
+  await expect(btn).toHaveAttribute('data-theme', 'dusk');
+  await btn.click({ button: 'right' });
+  await expect(btn).toHaveAttribute('data-theme', 'sunrise');
 });
