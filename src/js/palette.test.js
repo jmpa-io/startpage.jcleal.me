@@ -290,10 +290,7 @@ describe('popup wiring', () => {
   function markup() {
     document.body.innerHTML = `
       <button id="t" aria-expanded="false"></button>
-      <div id="p" hidden>
-        <input id="a" type="color" value="#c04828"><input id="b" type="color" value="#2f7fae">
-        <button id="r">Reset</button><span id="n"></span>
-      </div>
+      <div id="p"></div>
       <p id="out">outside</p>`;
   }
   async function boot() {
@@ -355,13 +352,123 @@ describe('popup wiring', () => {
   });
 });
 
+describe('shared colour panel', () => {
+  async function boot(extra = {}) {
+    document.body.innerHTML = '<button id="t"></button><div id="p"></div><p id="out">x</p>';
+    const Palette = await loadPalette();
+    Palette.init({ triggerId: 't', popupId: 'p', customIds: { primary: 'a', secondary: 'b', reset: 'r', note: 'n' }, ...extra });
+    document.dispatchEvent(new window.Event('DOMContentLoaded'));
+    return Palette;
+  }
+  const card = (s) => document.querySelector(`.pm-card[data-scheme="${s}"]`);
+
+  it('turns the popup into a labelled dialog and builds Day/Night preview cards, rows and a preview', async () => {
+    await boot();
+    const p = document.getElementById('p');
+    expect(p.getAttribute('role')).toBe('dialog');
+    expect(p.getAttribute('aria-label')).toBe('Colour theme');
+    expect(document.getElementById('t').getAttribute('aria-haspopup')).toBe('dialog');
+    expect(document.querySelectorAll('.pm-card')).toHaveLength(2);
+    expect(document.querySelector('.pm-preview')).not.toBeNull();
+    expect(document.getElementById('a').type).toBe('color');
+    expect(document.getElementById('a-hex').textContent).toBe('#c04828');
+  });
+
+  it('marks the active scheme and sets it when a card is clicked', async () => {
+    const P = await boot();
+    P.setScheme('light');
+    expect(card('light').getAttribute('aria-pressed')).toBe('true');
+    expect(card('dark').getAttribute('aria-pressed')).toBe('false');
+    card('dark').click();
+    expect(localStorage.getItem('scheme')).toBe('dark');
+    expect(root().classList.contains('dark')).toBe(true);
+    expect(card('dark').getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('renders each card in its own scheme from the current colours, and updates live with the hex text', async () => {
+    const P = await boot();
+    P.set({ primary: '#008080', secondary: '#ff69b4' });
+    const mini = (s) => card(s).querySelector('.pm-mini');
+    expect(mini('light').style.getPropertyValue('--pal-link')).toBe(P.vars(P.get(), false)['--pal-link']);
+    expect(mini('dark').style.getPropertyValue('--pal-link')).toBe(P.vars(P.get(), true)['--pal-link']);
+    expect(mini('light').style.getPropertyValue('--pal-bg')).not.toBe(mini('dark').style.getPropertyValue('--pal-bg'));
+    expect(document.getElementById('a-hex').textContent).toBe('#008080');
+    expect(document.getElementById('b-hex').textContent).toBe('#ff69b4');
+  });
+
+  it('offers Follow system (pressed until an explicit choice) that restores OS following', async () => {
+    const P = await boot();
+    const f = document.querySelector('.pm-follow');
+    expect(f.getAttribute('aria-pressed')).toBe('true');
+    card('dark').click();
+    expect(f.getAttribute('aria-pressed')).toBe('false');
+    f.click();
+    expect(localStorage.getItem('scheme')).toBeNull();
+    expect(f.getAttribute('aria-pressed')).toBe('true');
+    expect(P.scheme()).toBe('light');
+  });
+
+  it('Close button and Escape close it; opening moves focus into the dialog', async () => {
+    await boot();
+    const t = document.getElementById('t');
+    const p = document.getElementById('p');
+    document.body.append(); // focus() needs the elements attached, which they are.
+    t.click();
+    expect(p.classList.contains('open')).toBe(true);
+    expect(p.contains(document.activeElement)).toBe(true);
+    document.querySelector('.pm-close').click();
+    expect(p.classList.contains('open')).toBe(false);
+    expect(document.activeElement).toBe(t);
+  });
+});
+
+describe('Palette.init({ defaultScheme })', () => {
+  const BLUE = { primary: '#2f6fd6', secondary: '#5aa0d8' };
+
+  it('uses the pinned scheme when nothing is stored, even if the OS is light', async () => {
+    const P = await loadPalette();
+    P.init({ defaults: BLUE, defaultScheme: 'dark' });
+    expect(P.scheme()).toBe('dark');
+    expect(root().classList.contains('dark')).toBe(true);
+  });
+
+  it('an explicit stored choice wins over the pinned default', async () => {
+    localStorage.setItem('scheme', 'light');
+    const P = await loadPalette();
+    P.init({ defaults: BLUE, defaultScheme: 'dark' });
+    expect(P.scheme()).toBe('light');
+    expect(root().classList.contains('dark')).toBe(false);
+  });
+
+  it('ignores an invalid option, so the OS scheme still applies', async () => {
+    const P = await loadPalette();
+    P.init({ defaultScheme: 'sepia' });
+    expect(root().classList.contains('dark')).toBe(false);
+  });
+
+  it('Reset returns to the dark + blue default and has no Follow system option', async () => {
+    document.body.innerHTML = '<button id="t"></button><div id="p"></div>';
+    const P = await loadPalette();
+    P.init({ defaults: BLUE, defaultScheme: 'dark', triggerId: 't', popupId: 'p', customIds: { primary: 'a', secondary: 'b', reset: 'r' } });
+    document.dispatchEvent(new window.Event('DOMContentLoaded'));
+    expect(document.querySelector('.pm-follow')).toBeNull();
+    P.set({ primary: '#008080', secondary: '#ff69b4' });
+    P.setScheme('light');
+    document.getElementById('r').click();
+    expect(localStorage.getItem('palette-custom')).toBeNull();
+    expect(localStorage.getItem('scheme')).toBeNull();
+    expect(root().classList.contains('dark')).toBe(true);
+    expect(root().style.getPropertyValue('--pal-primary')).toBe('#2f6fd6');
+  });
+});
+
 describe('Palette.init({ defaults })', () => {
   const NAVY = { primary: '#0a2a6b', secondary: '#2f7fae' };
 
   it('replaces the default pair for get(), vars, inputs and reset', async () => {
-    document.body.innerHTML = '<input id="a"><input id="b"><button id="r"></button>';
+    document.body.innerHTML = '<button id="t"></button><div id="p"></div>';
     const P = await loadPalette();
-    P.init({ defaults: NAVY, customIds: { primary: 'a', secondary: 'b', reset: 'r' } });
+    P.init({ defaults: NAVY, triggerId: 't', popupId: 'p', customIds: { primary: 'a', secondary: 'b', reset: 'r' } });
     document.dispatchEvent(new window.Event('DOMContentLoaded'));
     expect(P.DEFAULT).toEqual(NAVY);
     expect(P.get().custom).toBe(false);
