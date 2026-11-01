@@ -31,8 +31,8 @@ test.describe('colour picker', () => {
   test('two inputs + reset, no presets; Escape and outside click close it', async ({ page }) => {
     await openPopup(page);
     await expect(page.locator('.palette-btn')).toHaveCount(0);
-    await expect(page.locator(S.primary)).toHaveValue('#c04828');
-    await expect(page.locator(S.secondary)).toHaveValue('#2f7fae');
+    await expect(page.locator(S.primary)).toHaveValue('#fc59a6');
+    await expect(page.locator(S.secondary)).toHaveValue('#5c9fff');
     await page.keyboard.press('Escape');
     await expect(page.locator(S.popup)).not.toHaveClass(/open/);
     await openPopup(page);
@@ -74,15 +74,15 @@ test.describe('colour picker', () => {
     await setColours(page, '#118833', '#aa22cc');
     await resetColours(page);
     expect(await storedColours(page)).toBeNull();
-    await expect(page.locator(S.primary)).toHaveValue('#c04828');
+    await expect(page.locator(S.primary)).toHaveValue('#fc59a6');
   });
 
   for (const bad of ['{"primary":"red;}"}', '{"primary":"#12345","secondary":"#aa22cc"}', 'not json']) {
     test(`corrupt storage ignored: ${bad}`, async ({ page }) => {
       await page.evaluate((v) => localStorage.setItem('palette-custom', v), bad);
       await page.reload();
-      await expect(page.locator(S.primary)).toHaveValue('#c04828');
-      expect(await page.evaluate(() => document.documentElement.style.getPropertyValue('--pal-primary'))).toBe('#c04828');
+      await expect(page.locator(S.primary)).toHaveValue('#fc59a6');
+      expect(await page.evaluate(() => document.documentElement.style.getPropertyValue('--pal-primary'))).toBe('#fc59a6');
     });
   }
 

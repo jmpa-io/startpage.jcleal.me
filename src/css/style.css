@@ -11,8 +11,8 @@
   /* The terminal is dark in both day and night. Its greys are tinted by the picker's Secondary (surfaces) and
      Primary (text); accents are lifted into a fixed light band so they hold AA on the dark ground for any pick.
      Arch blue (#1793d1) stays the base of the accent. */
-  --pal-p: var(--pal-primary, #c04828);
-  --pal-s: var(--pal-secondary, #2f7fae);
+  --pal-p: var(--pal-primary, #fc59a6);
+  --pal-s: var(--pal-secondary, #5c9fff);
   --tm-bg: oklch(from var(--pal-s) 0.17 min(c, 0.03) h);
   --tm-bar: oklch(from var(--pal-s) 0.23 min(c, 0.035) h);
   --tm-bar-2: oklch(from var(--pal-s) 0.21 min(c, 0.035) h);
@@ -315,6 +315,32 @@ body {
   margin: 0.6rem 0 0.4rem;
 }
 
+/* neofetch lives in its own small window beside the main one */
+.sp-window.sp-neo-win {
+  z-index: 4;
+  width: 340px;
+  height: auto;
+  max-width: calc(100vw - 16px);
+}
+
+.sp-neo-win .logo {
+  width: 64px;
+  height: 64px;
+}
+
+.sp-neo-win .sp-neo-body {
+  flex: none;
+  overflow: visible;
+}
+
+.sp-neo-win[hidden] {
+  display: none;
+}
+
+.sp-neo-win .neofetch {
+  gap: 1.2rem;
+}
+
 .logo {
   flex: none;
   width: 128px;
@@ -460,10 +486,45 @@ a:hover {
   background: var(--tm-accent);
 }
 
-.gh-link {
+.gh-link,
+.sp-brand-link {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
+}
+
+.sp-brand {
+  flex: none;
+  width: 1rem;
+  height: 1rem;
+}
+
+.sp-brand-glyph {
+  background-color: color-mix(in oklch, var(--brand, var(--tm-fg)) 78%, var(--tm-fg));
+  -webkit-mask: center / contain no-repeat;
+  mask: center / contain no-repeat;
+}
+
+.sp-brand-badge {
+  display: inline-grid;
+  place-items: center;
+  border-radius: 3px;
+  font: 700 0.6rem/1 var(--mono);
+  color: var(--tm-bg);
+  background: color-mix(in oklch, var(--brand, var(--tm-muted)) 80%, var(--tm-fg));
+}
+
+.sp-brand-badge::before {
+  content: attr(data-letter);
+}
+
+a:hover .sp-brand-glyph {
+  background-color: var(--tm-on-accent);
+}
+
+a:hover .sp-brand-badge {
+  background: var(--tm-on-accent);
+  color: var(--tm-accent);
 }
 
 .gh-mark {
@@ -894,6 +955,12 @@ a:hover {
     width: auto;
     height: auto;
     margin: 3.4rem 0.5rem 0.5rem;
+  }
+
+  .sp-window.sp-neo-win {
+    width: auto;
+    max-width: none;
+    margin: 0 0.5rem 0.5rem;
   }
 
   .sp-bar {
