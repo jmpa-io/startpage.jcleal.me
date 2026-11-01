@@ -37,6 +37,8 @@ export const NAMED: Record<string, [string, string]> = { 'teal-pink': SWEEP[1], 
 // ---- page helpers ----
 export const clearStorage = (page: Page) => page.evaluate(() => { localStorage.clear(); sessionStorage.clear(); });
 export const emulateScheme = (page: Page, scheme: Scheme) => page.emulateMedia({ colorScheme: scheme });
+// Stores an explicit scheme choice before any page script runs (for sites that pin a default scheme and so ignore the OS).
+export const pinScheme = (page: Page, scheme: Scheme) => page.addInitScript((s) => { try { localStorage.setItem('scheme', s); } catch { /* storage unavailable */ } }, scheme);
 export const isDark = (page: Page) => page.evaluate(() => document.documentElement.classList.contains('dark'));
 export const storedColours = (page: Page) => page.evaluate(() => localStorage.getItem('palette-custom'));
 export const storedScheme = (page: Page) => page.evaluate(() => localStorage.getItem('scheme'));
