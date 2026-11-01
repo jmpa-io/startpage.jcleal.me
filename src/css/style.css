@@ -341,6 +341,21 @@ body {
   gap: 1.2rem;
 }
 
+.logo-btn {
+  flex: none;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: 0;
+  line-height: 0;
+  cursor: pointer;
+}
+
+.logo-btn:focus-visible {
+  outline: 2px solid var(--tm-accent, currentColor);
+  outline-offset: 2px;
+}
+
 .logo {
   flex: none;
   width: 128px;
