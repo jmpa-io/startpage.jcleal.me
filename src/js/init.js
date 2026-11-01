@@ -1,5 +1,6 @@
 // Colours + day/night, applied from <head> before first paint (external so the CSP needs no inline-script exception).
 Palette.init({
+  defaults: { primary: '#fc59a6', secondary: '#5c9fff' }, // from the iTerm "Dotfiles" profile: pink + blue accents
   triggerId: 'palette-trigger',
   popupId: 'palette-popup',
   customIds: { primary: 'custom-primary', secondary: 'custom-secondary', reset: 'custom-reset', note: 'custom-note' },
