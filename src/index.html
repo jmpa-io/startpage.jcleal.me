@@ -1,99 +1,98 @@
 <!-- based on https://notabug.org/nytly/home-->
 <!DOCTYPE html>
-<html class="dark">
+<html>
 
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; form-action https://www.google.com https://google.com; base-uri 'none'; object-src 'none'">
   <link rel="stylesheet" type="text/css" href="css/style.css">
-  <link rel="stylesheet" type="text/css" href="css/palette.css">
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon-64x64.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="💻" />
+  <meta property="og:url" content="https://startpage.jcleal.me/" />
+  <meta property="og:image" content="https://startpage.jcleal.me/img/og-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://startpage.jcleal.me/img/og-image.png" />
   <title>💻</title>
-  <!-- prevent theme/palette flash -->
-  <script>(function(){
-    var s=localStorage.getItem('scheme');
-    if(s==='light')document.documentElement.classList.remove('dark');
-    var p=localStorage.getItem('palette');
-    var palettes=['ocean','forest','sunset','violet','yellow','grey','purple','crimson','teal'];
-    if(p&&palettes.indexOf(p)!==-1)document.documentElement.classList.add(p);
-  })()</script>
+  <!-- colours + day/night are applied here, before first paint (shared master: jcleal.me/static/js/palette.js) -->
   <script src="js/palette.js"></script>
-  <script>
-    Palette.init({
-      btnSelector: '.palette-btn',
-      triggerId: 'palette-trigger',
-      popupId: 'palette-popup',
-      toggleId: 'scheme-toggle',
-      onScheme: function (scheme, toggle) {
-        if (!toggle) return;
-        toggle.textContent = scheme === 'dark' ? '[dark]' : '[light]';
-      }
-    });
-  </script>
+  <script src="js/icons.js"></script>
+  <script src="js/init.js"></script>
 </head>
 
 <body>
   <div class="jc-controls">
-    <button class="scheme-toggle" id="scheme-toggle" title="Toggle theme">[dark]</button>
+    <button class="sp-btn scheme-toggle" id="scheme-toggle" type="button" aria-label="Toggle day/night" title="Toggle day/night">Day</button>
     <div class="palette-wrap">
-      <button class="palette-trigger" id="palette-trigger" title="Colour theme">[theme]</button>
-      <div class="palette-popup" id="palette-popup">
-        <button class="palette-btn" data-palette="ocean"><span class="palette-swatch" style="color:#1a7ab0">■</span> ocean</button>
-        <button class="palette-btn" data-palette="forest"><span class="palette-swatch" style="color:#2a7a30">■</span> forest</button>
-        <button class="palette-btn" data-palette="sunset"><span class="palette-swatch" style="color:#c04828">■</span> sunset</button>
-        <button class="palette-btn" data-palette="violet"><span class="palette-swatch" style="color:#6a30b0">■</span> violet</button>
-        <button class="palette-btn" data-palette="yellow"><span class="palette-swatch" style="color:#b89000">■</span> yellow</button>
-        <button class="palette-btn" data-palette="grey"><span class="palette-swatch" style="color:#7080a0">■</span> grey</button>
-        <button class="palette-btn" data-palette="purple"><span class="palette-swatch" style="color:#d01880">■</span> purple</button>
-        <button class="palette-btn" data-palette="crimson"><span class="palette-swatch" style="color:#c21f3a">■</span> crimson</button>
-        <button class="palette-btn" data-palette="teal"><span class="palette-swatch" style="color:#1a9a92">■</span> teal</button>
-        <button class="palette-btn" data-palette=""><span class="palette-swatch" style="color:#a7a9be">■</span> default</button>
+      <button class="sp-btn palette-trigger" id="palette-trigger" type="button" aria-label="Colours" aria-haspopup="true" aria-expanded="false" title="Colours" data-ico="palette"><span>Colours</span></button>
+      <div class="palette-popup" id="palette-popup"></div>
+    </div>
+  </div>
+
+  <!-- the links, groups and notes are rendered by js/app.js from js/store.js (localStorage "startpage.v1") -->
+  <main class="sp-window" id="sp-window" aria-label="start page terminal">
+    <div class="sp-bar" id="sp-bar">
+      <span class="sp-title"><span class="sp-title-ico" data-ico="arch" aria-hidden="true"></span>jcleal@archlinux:~</span>
+      <span class="sp-wbtns">
+        <button type="button" class="sp-wbtn" id="sp-min" aria-label="Collapse window to its title bar" title="Collapse" data-ico="min"></button>
+        <button type="button" class="sp-wbtn" id="sp-max" aria-label="Maximise window" title="Maximise" data-ico="max"></button>
+        <button type="button" class="sp-wbtn sp-wclose" id="sp-close" aria-label="Close window (restore from the chip)" title="Close" data-ico="close"></button>
+      </span>
+    </div>
+    <div class="sp-tools" role="toolbar" aria-label="Start page tools">
+      <button type="button" class="sp-btn" id="sp-edit" aria-pressed="false" data-ico="pencil"><span>Edit</span></button>
+      <button type="button" class="sp-btn sp-add-link" id="sp-add-link" data-ico="plus"><span>Link</span></button>
+      <button type="button" class="sp-btn sp-add-group" id="sp-add-group" data-ico="group"><span>Group</span></button>
+      <button type="button" class="sp-btn" id="sp-add-note" data-ico="note"><span>Note</span></button>
+      <span class="sp-sep" aria-hidden="true"></span>
+      <button type="button" class="sp-btn" id="sp-export" data-ico="download"><span>Export</span></button>
+      <button type="button" class="sp-btn" id="sp-import-btn" data-ico="upload"><span>Import</span></button>
+      <button type="button" class="sp-btn" id="sp-reset-layout" data-ico="reset" title="Reset window position and size"><span>Reset layout</span></button>
+      <input type="file" id="sp-import" accept="application/json,.json" hidden aria-label="Import JSON file">
+    </div>
+    <div class="sp-panel" id="sp-panel"></div>
+    <div class="terminal" id="sp-terminal" tabindex="0" role="region" aria-label="terminal output">
+      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> neofetch</div>
+      <div class="neofetch">
+        <img class="logo" src="img/logo-256.png" alt="jmpa hoodie logo" width="128" height="128" />
+        <div class="facts" id="sp-facts"></div>
       </div>
+      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> tree</div>
+      <div class="tree" id="sp-tree"></div>
+      <noscript><p>This page needs JavaScript to show your links.</p></noscript>
+      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> google</div>
+      <form action="https://google.com/search" method="GET" class="sp-search">
+        <h1>search: </h1>
+        <input type="text" name="q" aria-label="search" />
+      </form>
+      <div class="prompt"><span class="pr-br">[</span><span class="user">jcleal</span><span class="pr-at">@</span><span class="host">archlinux</span> <span class="pr-dir">~</span><span class="pr-br">]</span><span class="pr-dollar">$</span> <span class="cursor" aria-hidden="true"></span></div>
     </div>
-  </div>
-  <div class="terminal">
-    <div class="prompt">[<span class="user">jcleal</span>@<span>home</span> ~]$ tree</div>
-    <div class="tree">
-      <h1>.</h1>
-      <ul>
-        <li>
-          <h1>work</h1>
-          <ul>
-            <li><a href="https://outlook.office.com">mail</a></li>
-            <li><a href="https://arlive.atlassian.net/secure/RapidBoard.jspa?projectKey=OBS&rapidView=1612">jira board</a></li>
-            <li><a href="https://myobconfluence.atlassian.net/wiki/spaces/AL/pages/935789405/I+am+new+to+Kepler">confluence</a></li>
-            <li><a href="https://github.com/myob-ops">github</a></li>
-            <li><a href="https://buildkite.com/myob">buildkite</a></li>
-            <li><a href="https://myob.slack.com">slack</a></li>
-            <li><a href="https://myob.com/adfs">adfs</a></li>
-            <li><a href="https://myob.com/aws">aws</a></li>
-            <li><a href="https://my.1password.com/signin?l=en">1password</a></li>
-            <li><a href="https://myobportal.cloud.com">citrix</a></li>
-            <li><a href="https://myob.bridgeapp.com">bridge</a></li>
-            <li><a href="https://www.concursolutions.com/UI/SSO/p0001504zvoa">concur</a></li>
-            <li><a href="https://myob.orbitworldtravel.com/">orbit world travel</a></li>
-          </ul>
-        </li>
-        <li>
-          <h1>personal</h1>
-          <ul>
-            <li><a href="https://github.com/jmpa-oss">github (jmpa)</a></li>
-            <li><a href="https://github.com/jcleal">github</a></li>
-            <li><a href="https://gitlab.com/">gitlab</a></li>
-            <li><a href="https://jmpa-oss.slack.com">slack (jmpa)</a></li>
-            <li><a href="https://messenger.com">messenger</a></li>
-            <li><a href="https://open.spotify.com">spotify</a></li>
-            <li><a href="https://drive.google.com/drive/my-drive">google drive</a></li>
-            <li><a href="https://my.pocketsmith.com/dashboard">pocketsmith</a></li>
-          </ul>
-        </li>
-      </ul>
+    <div class="sp-statusbar">
+      <span class="sb-ws" aria-hidden="true"><b>[start]</b> 0:links*</span>
+      <span class="sb-msg" id="sp-status" role="status"></span>
+      <span class="sb-clock" id="sp-clock" aria-hidden="true"></span>
     </div>
-    <div class="prompt">[<span class="user">jcleal</span>@<span>home</span> ~]$ google</div>
-    <form action="https://google.com/search" method="GET">
-      <h1>search: </h1>
-      <input type="text" name="q" autofocus="autofocus" tabIndex="1" />
-    </form>
-  </div>
+    <div class="sp-grip sp-grip-n" data-grip="n" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize window from the top edge (arrow keys)"></div>
+    <div class="sp-grip sp-grip-s" data-grip="s" role="separator" aria-orientation="horizontal" tabindex="0" aria-label="Resize window from the bottom edge (arrow keys)"></div>
+    <div class="sp-grip sp-grip-e" data-grip="e" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize window from the right edge (arrow keys)"></div>
+    <div class="sp-grip sp-grip-w" data-grip="w" role="separator" aria-orientation="vertical" tabindex="0" aria-label="Resize window from the left edge (arrow keys)"></div>
+    <div class="sp-grip sp-grip-ne" data-grip="ne" role="separator" tabindex="0" aria-label="Resize window from the top-right corner (arrow keys)"></div>
+    <div class="sp-grip sp-grip-nw" data-grip="nw" role="separator" tabindex="0" aria-label="Resize window from the top-left corner (arrow keys)"></div>
+    <div class="sp-grip sp-grip-se" data-grip="se" role="separator" tabindex="0" aria-label="Resize window from the bottom-right corner (arrow keys)"></div>
+    <div class="sp-grip sp-grip-sw" data-grip="sw" role="separator" tabindex="0" aria-label="Resize window from the bottom-left corner (arrow keys)"></div>
+  </main>
+  <button type="button" class="sp-btn sp-chip" id="sp-chip" hidden data-ico="restore"><span>jcleal@archlinux: ~</span></button>
+  <div class="sp-notes" id="sp-notes"></div>
+
+  <script src="js/note-colours.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/app.js"></script>
 </body>
 
 </html>
