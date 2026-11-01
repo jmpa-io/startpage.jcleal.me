@@ -51,3 +51,19 @@ test('share image meta points at the real domain and an existing image', async (
     expect(r.headers()['content-type']).toMatch(/^image\//);
   }
 });
+
+test('clicking the neofetch hoodie cycles through the six themed tiles and remembers the choice', async ({ page }) => {
+  await page.goto('/');
+  const btn = page.locator('#sp-logo-btn');
+  const logo = page.locator('.neofetch img.logo');
+  const themes = ['dusk', 'night', 'autumn', 'mist', 'meadow-day', 'sunrise', 'dusk'];
+  for (let i = 0; i < themes.length; i++) {
+    await expect(btn).toHaveAttribute('data-theme', themes[i]);
+    await expect(logo).toHaveAttribute('src', `img/logo-${themes[i]}.png`);
+    await expect.poll(() => logo.evaluate((im: HTMLImageElement) => im.complete && im.naturalWidth > 0)).toBe(true);
+    if (i < themes.length - 1) await btn.click();
+  }
+  await btn.click();
+  await page.reload();
+  await expect(btn).toHaveAttribute('data-theme', 'night');
+});
