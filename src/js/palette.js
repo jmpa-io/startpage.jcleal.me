@@ -356,6 +356,10 @@
       focus: function () {
         var active = cardEls[state.dark ? 'dark' : 'light'];
         active.focus({ preventScroll: true });
+      },
+      destroy: function () {
+        var i = state.panels.indexOf(panel);
+        if (i >= 0) state.panels.splice(i, 1);
       }
     };
     state.panels.push(panel);
