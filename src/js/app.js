@@ -169,7 +169,9 @@
       a.appendChild(mark());
       a.appendChild(document.createTextNode(l.name));
     } else {
-      a.textContent = l.name;
+      a.className = 'sp-brand-link';
+      a.appendChild(window.SPBrand(l.name, l.url));
+      a.appendChild(document.createTextNode(l.name));
     }
     li.appendChild(a);
     if (editing) {
@@ -461,6 +463,31 @@
     placeWin();
     say('window layout reset');
   });
+
+  // ---- neofetch window: its own small draggable window, toggled from the toolbar ----
+  var neo = $('sp-neo-win');
+  var neoPos = null;
+  function placeNeo() {
+    neo.style.left = '';
+    neo.style.top = '';
+    if (narrow.matches) return;
+    var w = neo.offsetWidth || 340;
+    var h = neo.offsetHeight || 220;
+    var p = neoPos || { x: 24 + DEF_W + 16, y: 72 };
+    neo.style.left = Math.min(Math.max(0, p.x), Math.max(0, window.innerWidth - w)) + 'px';
+    neo.style.top = Math.min(Math.max(0, p.y), Math.max(0, window.innerHeight - h)) + 'px';
+  }
+  function setNeo(on) {
+    neo.hidden = !on;
+    $('sp-neo-toggle').setAttribute('aria-pressed', String(on));
+    $('sp-neo-toggle').classList.toggle('on', on);
+    if (on) placeNeo();
+  }
+  drag($('sp-neo-bar'), neo, function (x, y) { neoPos = { x: x, y: y }; placeNeo(); }, function () {}, 'button');
+  $('sp-neo-close').addEventListener('click', function () { setNeo(false); });
+  $('sp-neo-toggle').addEventListener('click', function () { setNeo(neo.hidden); });
+  window.addEventListener('resize', function () { if (!neo.hidden) placeNeo(); });
+  placeNeo();
 
   // ---- notes ----
   var SLOT_NAMES = ['Primary', 'Secondary', 'Yellow', 'Green', 'Pink', 'Blend'];

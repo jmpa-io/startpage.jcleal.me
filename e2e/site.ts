@@ -13,6 +13,7 @@ export const site: {
 } = {
   name: 'startpage.jcleal.me',
   port: Number(process.env.E2E_PORT || 4175), // E2E_PORT runs a second checkout/worktree beside the first.
+  defaults: ['#fc59a6', '#5c9fff'],
   siteDir: '../src',
   projects: [
     { name: 'desktop', use: { viewport: { width: 1280, height: 800 } } },
