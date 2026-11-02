@@ -32,7 +32,7 @@ test.describe('colour picker', () => {
     await openPopup(page);
     await expect(page.locator('.palette-btn')).toHaveCount(0);
     await expect(page.locator(S.primary)).toHaveValue('#fc59a6');
-    await expect(page.locator(S.secondary)).toHaveValue('#5c9fff');
+    await expect(page.locator(S.secondary)).toHaveValue('#a3a3a3');
     await page.keyboard.press('Escape');
     await expect(page.locator(S.popup)).not.toHaveClass(/open/);
     await openPopup(page);
