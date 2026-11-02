@@ -489,6 +489,32 @@
   window.addEventListener('resize', function () { if (!neo.hidden) placeNeo(); });
   placeNeo();
 
+  // clicking the neofetch hoodie cycles through the art.jmpa.io themed tiles; the choice is remembered
+  var LOGO_THEMES = ['meadow-day', 'sunrise', 'dusk', 'night', 'autumn', 'mist'];
+  var LOGO_KEY = 'sp-logo-theme';
+  var logoImg = $('sp-logo');
+  var logoIdx = LOGO_THEMES.indexOf('dusk');
+  try {
+    var savedLogo = LOGO_THEMES.indexOf(localStorage.getItem(LOGO_KEY));
+    if (savedLogo >= 0) logoIdx = savedLogo;
+  } catch (e) { /* storage blocked: keep the default */ }
+  function showLogo() {
+    logoImg.src = 'img/logo-' + LOGO_THEMES[logoIdx] + '.png';
+    $('sp-logo-btn').dataset.theme = LOGO_THEMES[logoIdx];
+  }
+  showLogo();
+  function stepLogo(dir) {
+    logoIdx = (logoIdx + dir + LOGO_THEMES.length) % LOGO_THEMES.length;
+    showLogo();
+    try { localStorage.setItem(LOGO_KEY, LOGO_THEMES[logoIdx]); } catch (e) { /* ignore */ }
+  }
+  $('sp-logo-btn').addEventListener('click', function () { stepLogo(1); });
+  // right-click goes back one theme instead of opening the browser menu
+  $('sp-logo-btn').addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    stepLogo(-1);
+  });
+
   // ---- notes ----
   var SLOT_NAMES = ['Primary', 'Secondary', 'Yellow', 'Green', 'Pink', 'Blend'];
   var topZ = 10;
