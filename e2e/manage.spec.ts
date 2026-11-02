@@ -623,7 +623,6 @@ test.describe('mobile layout', () => {
       expect(b.x + b.width).toBeLessThanOrEqual(390);
       expect(b.height).toBeGreaterThanOrEqual(28);
     }
-    await expect(page.locator('input[name=q]')).toBeAttached();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     const nb = (await page.locator('.sp-note').boundingBox())!;
     expect(nb.x).toBeGreaterThanOrEqual(0);

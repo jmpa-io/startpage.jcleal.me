@@ -71,7 +71,7 @@ Resources:
             Override: true
             ContentSecurityPolicy: >-
               default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self';
-              font-src 'self'; connect-src 'none'; form-action https://www.google.com https://google.com;
+              font-src 'self'; connect-src 'none'; form-action 'none';
               base-uri 'none'; object-src 'none'; frame-ancestors 'none'
           ContentTypeOptions:
             Override: true

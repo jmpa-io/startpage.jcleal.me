@@ -15,9 +15,9 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('page', () => {
-  test('renders the tree and search, makes no external requests', async ({ page }) => {
+  test('renders the tree, has no search box and makes no external requests', async ({ page }) => {
     await expect(page.locator('.tree a')).toHaveCount(21);
-    await expect(page.locator('input[name=q]')).toBeVisible();
+    await expect(page.locator('input[name=q], form.sp-search')).toHaveCount(0);
     expect(external(page)).toEqual([]);
   });
 
