@@ -13,18 +13,18 @@
      Arch blue (#1793d1) stays the base of the accent. */
   --pal-p: var(--pal-primary, #fc59a6);
   --pal-s: var(--pal-secondary, #5c9fff);
-  --tm-bg: oklch(from var(--pal-s) 0.17 min(c, 0.03) h);
-  --tm-bar: oklch(from var(--pal-s) 0.23 min(c, 0.035) h);
-  --tm-bar-2: oklch(from var(--pal-s) 0.21 min(c, 0.035) h);
-  --tm-field: oklch(from var(--pal-s) 0.13 min(c, 0.025) h);
-  --tm-hover: oklch(from var(--pal-s) 0.3 min(c, 0.045) h);
-  --tm-line: oklch(from var(--pal-s) 0.36 min(c, 0.05) h);
-  --tm-fg: oklch(from var(--pal-p) 0.91 min(c, 0.02) h);
-  --tm-muted: oklch(from var(--pal-p) 0.75 min(c, 0.035) h);
+  --tm-bg: #232323;
+  --tm-bar: #2e2e2e;
+  --tm-bar-2: #2a2a2a;
+  --tm-field: #1b1b1b;
+  --tm-hover: #3b3b3b;
+  --tm-line: #4a4a4a;
+  --tm-fg: oklch(from var(--pal-p) 0.91 min(c, 0.006) h);
+  --tm-muted: oklch(from var(--pal-p) 0.75 min(c, 0.01) h);
   --tm-user: oklch(from var(--pal-p) clamp(0.72, l, 0.82) min(c, 0.17) h);
   --tm-host: oklch(from var(--pal-s) clamp(0.72, l, 0.84) min(c, 0.15) h);
-  --tm-accent: color-mix(in oklch, #1793d1 45%, var(--tm-host));
-  --tm-on-accent: oklch(from var(--pal-s) 0.14 min(c, 0.02) h);
+  --tm-accent: color-mix(in oklch, #1793d1 20%, var(--tm-host));
+  --tm-on-accent: #1b1b1b;
   --branch: 1px solid var(--tm-line);
   --foreground: var(--pal-text, #1a1a1a);
 }
@@ -35,11 +35,11 @@ html {
   overflow: hidden;
   overscroll-behavior: none;
   /* calm backdrop from Secondary: mid-tone by day, deep by night, so the (always dark) terminal stands out */
-  background: radial-gradient(ellipse at 30% 15%, oklch(from var(--pal-s) 0.8 min(c, 0.05) h), oklch(from var(--pal-s) 0.66 min(c, 0.07) h)) fixed;
+  background: radial-gradient(ellipse at 30% 15%, oklch(from var(--pal-s) 0.8 min(c, 0.012) h), oklch(from var(--pal-s) 0.66 min(c, 0.015) h)) fixed;
 }
 
 html.dark {
-  background: radial-gradient(ellipse at 30% 15%, oklch(from var(--pal-s) 0.33 min(c, 0.05) h), oklch(from var(--pal-s) 0.24 min(c, 0.05) h)) fixed;
+  background: radial-gradient(ellipse at 30% 15%, oklch(from var(--pal-s) 0.33 min(c, 0.01) h), oklch(from var(--pal-s) 0.24 min(c, 0.01) h)) fixed;
 }
 
 body {
