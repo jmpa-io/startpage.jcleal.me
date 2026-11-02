@@ -1,0 +1,65 @@
+/* jmpa-io shared palette core — master copy. Mirrored into jmpa.io,
+   startpage.jcleal.me, gha-workflow-dashboard. Edit here first. */
+
+/* ── palette themes ──
+   Each palette sets ONE base color (--pal-base for light, --pal-base-dark for dark).
+   All derived variables are computed mathematically from that base using oklch
+   (perceptually uniform lightness — equal steps look equal across all hues).
+
+   Light ramp:
+     heading      = base, lightness −25% (deep/dark)
+     accent       = base (the pure hue)
+     accent-hover = base, lightness −12%
+     btn          = base-2, lightness +28%, chroma −40% (pale wash)
+     muted        = base, lightness +18%, chroma −60% (desaturated)
+     subtle       = base at 6% opacity (near-invisible tint)
+
+   Dark ramp (inverted — lighter = more vivid on dark bg):
+     heading      = base-dark, lightness +30%
+     accent       = base-dark, lightness +15%
+     accent-hover = base-dark, lightness +22%
+     btn          = base-2-dark, lightness −20%, chroma −40%
+     muted        = base-dark, lightness −10%, chroma −55%
+     subtle       = base-dark at 10% opacity
+*/
+
+:root {
+  --pal-base:        oklch(48% 0.19 240);
+  --pal-base-dark:   oklch(48% 0.19 240);
+  --pal-base-2:      oklch(60% 0.17  60);
+  --pal-base-2-dark: oklch(60% 0.17  60);
+}
+html.ocean   { --pal-base: oklch(52% 0.18 220); --pal-base-dark: oklch(52% 0.18 220); --pal-base-2: oklch(58% 0.18  40); --pal-base-2-dark: oklch(58% 0.18  40); }
+html.forest  { --pal-base: oklch(48% 0.18 145); --pal-base-dark: oklch(48% 0.18 145); --pal-base-2: oklch(58% 0.20 325); --pal-base-2-dark: oklch(58% 0.20 325); }
+html.sunset  { --pal-base: oklch(54% 0.22  30); --pal-base-dark: oklch(54% 0.22  30); --pal-base-2: oklch(55% 0.15 210); --pal-base-2-dark: oklch(55% 0.15 210); }
+html.violet  { --pal-base: oklch(42% 0.24 280); --pal-base-dark: oklch(42% 0.24 280); --pal-base-2: oklch(62% 0.15 100); --pal-base-2-dark: oklch(62% 0.15 100); }
+html.yellow  { --pal-base: oklch(58% 0.17  80); --pal-base-dark: oklch(58% 0.17  80); --pal-base-2: oklch(50% 0.20 260); --pal-base-2-dark: oklch(50% 0.20 260); }
+html.grey    { --pal-base: oklch(48% 0.07 230); --pal-base-dark: oklch(48% 0.07 230); --pal-base-2: oklch(55% 0.08  50); --pal-base-2-dark: oklch(55% 0.08  50); }
+html.purple  { --pal-base: oklch(48% 0.24 340); --pal-base-dark: oklch(48% 0.24 340); --pal-base-2: oklch(55% 0.16 160); --pal-base-2-dark: oklch(55% 0.16 160); }
+html.crimson { --pal-base: oklch(48% 0.22  10); --pal-base-dark: oklch(48% 0.22  10); --pal-base-2: oklch(55% 0.14 190); --pal-base-2-dark: oklch(55% 0.14 190); }
+html.teal    { --pal-base: oklch(50% 0.15 185); --pal-base-dark: oklch(50% 0.15 185); --pal-base-2: oklch(58% 0.19   5); --pal-base-2-dark: oklch(58% 0.19   5); }
+
+/* light mode — heading/accent/muted from --pal-base, buttons/tags from the complementary --pal-base-2 */
+:root,
+html.ocean, html.forest, html.sunset, html.violet, html.yellow, html.grey, html.purple,
+html.crimson, html.teal {
+  --pal-heading:      oklch(from var(--pal-base) calc(l - 0.25) c h);
+  --pal-accent:       oklch(from var(--pal-base) l c h);
+  --pal-accent-hover: oklch(from var(--pal-base) calc(l - 0.12) c h);
+  --pal-btn:          oklch(from var(--pal-base-2) l c h);
+  --pal-muted:        oklch(from var(--pal-base) calc(l + 0.18) calc(c - 0.12) h);
+  --pal-subtle:       color-mix(in oklch, var(--pal-base) 6%, transparent);
+}
+
+/* dark mode — derived from --pal-base-dark / --pal-base-2-dark */
+html.dark,
+html.dark.ocean, html.dark.forest, html.dark.sunset,
+html.dark.violet, html.dark.yellow, html.dark.grey, html.dark.purple,
+html.dark.crimson, html.dark.teal {
+  --pal-heading:      oklch(from var(--pal-base-dark) calc(l + 0.30) c h);
+  --pal-accent:       oklch(from var(--pal-base-dark) calc(l + 0.15) c h);
+  --pal-accent-hover: oklch(from var(--pal-base-dark) calc(l + 0.22) c h);
+  --pal-btn:          oklch(from var(--pal-base-2-dark) calc(l + 0.08) c h);
+  --pal-muted:        oklch(from var(--pal-base-dark) calc(l - 0.10) calc(c - 0.12) h);
+  --pal-subtle:       color-mix(in oklch, var(--pal-base-dark) 10%, transparent);
+}
