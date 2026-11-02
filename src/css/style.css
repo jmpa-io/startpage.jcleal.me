@@ -10,9 +10,9 @@
 
   /* The terminal is dark in both day and night. Its greys are tinted by the picker's Secondary (surfaces) and
      Primary (text); accents are lifted into a fixed light band so they hold AA on the dark ground for any pick.
-     Arch blue (#1793d1) stays the base of the accent. */
+     Defaults are neutral grey. */
   --pal-p: var(--pal-primary, #fc59a6);
-  --pal-s: var(--pal-secondary, #5c9fff);
+  --pal-s: var(--pal-secondary, #a3a3a3);
   --tm-bg: #232323;
   --tm-bar: #2e2e2e;
   --tm-bar-2: #2a2a2a;
@@ -23,7 +23,7 @@
   --tm-muted: oklch(from var(--pal-p) 0.75 min(c, 0.01) h);
   --tm-user: oklch(from var(--pal-p) clamp(0.72, l, 0.82) min(c, 0.17) h);
   --tm-host: oklch(from var(--pal-s) clamp(0.72, l, 0.84) min(c, 0.15) h);
-  --tm-accent: color-mix(in oklch, #1793d1 20%, var(--tm-host));
+  --tm-accent: var(--tm-host);
   --tm-on-accent: #1b1b1b;
   --branch: 1px solid var(--tm-line);
   --foreground: var(--pal-text, #1a1a1a);
@@ -50,7 +50,7 @@ body {
 }
 
 ::selection {
-  background: var(--pal-sel-bg, #b6d4ea);
+  background: var(--pal-sel-bg, #c8c8c8);
   color: var(--pal-sel-text, #000);
 }
 
@@ -60,7 +60,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--pal-focus, #0a6a78);
+  outline: 2px solid var(--pal-focus, #555);
   outline-offset: 2px;
 }
 
@@ -73,7 +73,7 @@ body {
 .sp-btn {
   --b-bg: var(--pal-surface, #fff);
   --b-fg: var(--pal-text, #1a1a1a);
-  --b-bd: var(--pal-border-strong, #8a8fa0);
+  --b-bd: var(--pal-border-strong, #8c8c8c);
   --b-hover: var(--pal-surface-2, #eee);
   display: inline-flex;
   align-items: center;
@@ -416,14 +416,14 @@ body {
   height: 1.1em;
 }
 
-.blk0 { background: oklch(0.4 0.02 260); }
+.blk0 { background: oklch(0.4 0 0); }
 .blk1 { background: oklch(0.6 0.19 25); }
 .blk2 { background: oklch(0.72 0.17 145); }
 .blk3 { background: oklch(0.84 0.14 90); }
-.blk4 { background: #1793d1; }
+.blk4 { background: oklch(0.62 0 0); }
 .blk5 { background: oklch(0.68 0.17 330); }
 .blk6 { background: oklch(0.78 0.11 195); }
-.blk7 { background: oklch(0.9 0.01 260); }
+.blk7 { background: oklch(0.9 0 0); }
 
 /* ── tree ── */
 h1 {
