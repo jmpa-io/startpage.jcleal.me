@@ -624,30 +624,6 @@ a:hover .sp-brand-badge {
   gap: 0.35rem;
 }
 
-.sp-search {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.sp-search input {
-  flex: 1;
-  min-width: 0;
-  font: 0.93rem var(--mono);
-  color: var(--tm-fg);
-  caret-color: var(--tm-accent);
-  background: transparent;
-  border: 0;
-  border-bottom: 1px dashed var(--tm-line);
-  padding: 0.1rem 0.2rem;
-}
-
-.sp-search input:focus {
-  border-bottom-style: solid;
-  border-bottom-color: var(--tm-accent);
-  outline: none;
-}
-
 /* ── tmux/polybar-style status bar ── */
 .sp-statusbar {
   display: flex;
