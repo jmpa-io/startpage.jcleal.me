@@ -447,7 +447,7 @@ test.describe('buttons', () => {
     const b = page.locator('#sp-export');
     const idle = await b.evaluate((e) => getComputedStyle(e).backgroundColor);
     await b.hover();
-    expect(await b.evaluate((e) => getComputedStyle(e).backgroundColor)).not.toBe(idle);
+    await expect.poll(() => b.evaluate((e) => getComputedStyle(e).backgroundColor)).not.toBe(idle); // background transitions over 120ms.
     await b.focus();
     await page.keyboard.press('Tab');
     await page.keyboard.press('Shift+Tab');

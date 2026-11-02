@@ -2,7 +2,8 @@
   "name": "startpage.jcleal.me",
   "private": true,
   "scripts": {
-    "test": "NODE_OPTIONS=--no-experimental-webstorage vitest run"
+    "test": "NODE_OPTIONS=--no-experimental-webstorage vitest run",
+    "screenshots": "cd e2e && npx playwright test screenshots.spec.ts --project=desktop"
   },
   "devDependencies": {
     "jsdom": "^25.0.1",
