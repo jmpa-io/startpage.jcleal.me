@@ -65,7 +65,10 @@ jobs:
   # existence check, or replace live resources if it ever passed. Migrate the live stack (resource import)
   # before re-adding a deploy job.
 
+  # Only deploy from main. Without this guard every branch push (every Dependabot branch) updated the dev stack at once and the
+  # runs collided: 'Stack is in UPDATE_IN_PROGRESS state and can not be updated'.
   deploy:
+    if: github.ref == 'refs/heads/main'
     needs: [build-website, test]
     uses: jmpa-io/pipelines/.github/workflows/40-deploy-to-aws.yml@0877ff2d3aa9a4add377ad679135ab5a5c3e2b8a # v1.1.0
     with:
