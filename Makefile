@@ -72,4 +72,4 @@ PHONY += e2e
 # Includes the common Makefile.
 # NOTE: this recursively goes back and finds the `.git` directory and assumes
 # this is the root of the project.
-include $(shell while [[ ! -d .git ]]; do cd ..; done; pwd)/Makefile.common.mk
+include $(shell while [[ ! -e .git && $$PWD != / ]]; do cd ..; done; pwd)/Makefile.common.mk
